@@ -1,0 +1,17 @@
+Netlogix:
+  Crud:
+
+    metaDataProcessorIndividuals: []
+
+#      listOfObjectsHavingUriPointerAuthorAttributes:
+#        path = %\d+\.author%
+#        processor: "Netlogix\Crud\Domain\Service\MetaDataProcessor\UriPointerMetaDataProcessor"
+#      objectsHavingUriPointerAuthorAttributes:
+#        path: %author%
+#        processor: "Netlogix\Crud\Domain\Service\MetaDataProcessor\UriPointerMetaDataProcessor"
+
+    metaDataProcessorGroups: []
+
+#      'Netlogix\Socializing\Controller\CommentController\listAction': "listOfObjectsHavingUriPointerAuthorAttributes"
+#      'Netlogix\Socializing\Controller\CommentController\showAction': "objectsHavingUriPointerAuthorAttributes"
+
