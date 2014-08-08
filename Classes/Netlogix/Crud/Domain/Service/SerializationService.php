@@ -100,6 +100,11 @@ class SerializationService {
 	protected $settings;
 
 	/**
+	 * @var array
+	 */
+	private $formerConfigurationStack = array();
+
+	/**
 	 * Returns JsonEncode of the given object.
 	 * If UriPointers are found in the DTO hierarchy, the UriBuilder is required to resolve
 	 * them.
@@ -126,6 +131,25 @@ class SerializationService {
 	 */
 	public function process($object, \TYPO3\Flow\Mvc\Routing\UriBuilder $uriBuilder, $metaDataProcessorGroup = NULL) {
 
+		$formerConfigurationStackAttributes = array(
+			'cacheTagService',
+			'metaDataProcessors',
+			'metaDataProcessorStorage',
+			'uriBuilder',
+			'propertyPath',
+		);
+
+		/*
+		 * Remember previous state
+		 */
+		array_unshift($this->formerConfigurationStack, array());
+		foreach ($formerConfigurationStackAttributes as $formerConfigurationStackAttribute) {
+			$this->formerConfigurationStack[0][$formerConfigurationStackAttribute] = $this->{$formerConfigurationStackAttribute};
+		}
+
+		/*
+		 * Initialize
+		 */
 		$this->uriBuilder = $uriBuilder;
 		$this->propertyPath = array();
 		$this->initializeMetaDataProcessors($metaDataProcessorGroup);
@@ -138,7 +162,7 @@ class SerializationService {
 		*/
 
 		$result = $this->processInternal($object);
-		$result = $this->applyMetaData($result);
+		$result = $this->applyMetaData($result, $object);
 
 		/*
 		if ($cacheTagService) {
@@ -147,11 +171,13 @@ class SerializationService {
 		}
 		*/
 
-		$this->cacheTagService = NULL;
-		$this->metaDataProcessors = array();
-		$this->metaDataProcessorStorage = array();
-		$this->uriBuilder = NULL;
-		$this->propertyPath = array();
+		/*
+		 * Reset previous state
+		 */
+		foreach ($formerConfigurationStackAttributes as $formerConfigurationStackAttribute) {
+			$this->{$formerConfigurationStackAttribute} = $this->formerConfigurationStack[0][$formerConfigurationStackAttribute];
+		}
+		array_shift($this->formerConfigurationStack);
 
 		return $result;
 	}
@@ -274,11 +300,11 @@ class SerializationService {
 	 * used.
 	 *
 	 * @param $propertyPath
-	 * @param $originalValue
 	 * @param $processedValue
+	 * @param mixed $object
 	 * @return array
 	 */
-	protected function getMetaData($propertyPath, $processedValue) {
+	protected function getMetaData($propertyPath, $processedValue, $object) {
 		$metaData = array();
 
 		foreach ($this->metaDataProcessors as $metaDataProcessorKey => $metaDataProcessorConfiguration) {
@@ -292,7 +318,7 @@ class SerializationService {
 			if (preg_match($path, $propertyPath)) {
 				/** @var \Netlogix\Crud\Domain\Service\MetaDataProcessor\AbstractMetaDataProcessor $processor */
 				$processor = $metaDataProcessorConfiguration['processor'];
-				$metaData = $processor->process($metaData, $propertyPath, $processedValue, $this->metaDataProcessorStorage[$metaDataProcessorKey], $this->cacheTagService);
+				$metaData = $processor->process($metaData, $propertyPath, $processedValue, $this->metaDataProcessorStorage[$metaDataProcessorKey], $object, $this->uriBuilder, $this->metaDataProcessorGroup);
 			}
 
 		}
@@ -309,9 +335,10 @@ class SerializationService {
 	 * which take a whatever deep array and make it into a well formed string.
 	 *
 	 * @param array $result
+	 * @param mixed $object
 	 * @return array
 	 */
-	protected function applyMetaData($result) {
+	protected function applyMetaData($result, $object) {
 
 		if (!is_array($result)) {
 			return $result;
@@ -321,7 +348,7 @@ class SerializationService {
 		$additionalMetaData = array();
 
 		foreach ($flatResult as $propertyPath => $value) {
-			$metaData = $this->getMetaData($propertyPath, $value);
+			$metaData = $this->getMetaData($propertyPath, $value, $object);
 			if ($metaData) {
 				$additionalMetaData = array_merge($additionalMetaData, \Netlogix\Crud\Utility\ArrayUtility::flatten($metaData, $propertyPath . '#'));
 			}

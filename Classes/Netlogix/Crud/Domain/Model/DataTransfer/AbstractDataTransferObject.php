@@ -21,6 +21,7 @@ use TYPO3\Flow\Annotations as Flow;
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  * @Flow\Scope("prototype")
  * @Flow\Entity
+ * @ORM\InheritanceType("JOINED")
  */
 abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model\DataTransfer\DataTransferInterface {
 
@@ -155,6 +156,13 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 		} else {
 			return NULL;
 		}
+	}
+
+	/**
+	 * @return string
+	 */
+	public function __toString() {
+		return \TYPO3\Flow\Core\Bootstrap::$staticObjectManager->get('TYPO3\\Flow\\Persistence\\PersistenceManagerInterface')->getIdentifierByObject($this->getInnermostSelf());
 	}
 
 }

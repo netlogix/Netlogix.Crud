@@ -63,7 +63,7 @@ class DataTransferObjectFactory {
 	 * @return bool
 	 */
 	public function hasDataTransferObject($object) {
-		return ($this->getDataTransferObjectNameForObject($object) !== NULL);
+		return ($this->getDataTransferObjectName($object) !== NULL);
 	}
 
 	/**

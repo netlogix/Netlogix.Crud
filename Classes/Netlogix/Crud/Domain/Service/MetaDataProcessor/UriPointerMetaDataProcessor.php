@@ -51,9 +51,12 @@ class UriPointerMetaDataProcessor extends \Netlogix\Crud\Domain\Service\MetaData
 	 * @param string $propertyPath
 	 * @param mixed $processedValue
 	 * @param array $upstreamStorage
+	 * @param mixed $object
+	 * @param \TYPO3\Flow\Mvc\Routing\UriBuilder $uriBuilder
+	 * @param string $metaDataProcessorGroup
 	 * @return array
 	 */
-	public function process($metaData, $propertyPath, $processedValue, array &$alreadyIncluded) {
+	public function process($metaData, $propertyPath, $processedValue, array &$alreadyIncluded, $object, $uriBuilder, $metaDataProcessorGroup) {
 		if (in_array($processedValue, $alreadyIncluded)) {
 			return $metaData;
 		}
