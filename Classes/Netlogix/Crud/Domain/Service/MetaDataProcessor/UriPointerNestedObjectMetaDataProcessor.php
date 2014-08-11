@@ -74,22 +74,15 @@ class UriPointerNestedObjectMetaDataProcessor extends \Netlogix\Crud\Domain\Serv
 			return $metaData;
 		}
 
-		if (count($originalValue->getArguments()) > 1) {
-			$content = $this->serializationService->process($originalValue->getArguments(), $uriBuilder, $metaDataProcessorGroup);
-
+		if ($originalValue->getInlineRepresentative() !== NULL) {
+			$dataTransferObject = $this->geDataTransferObjectForInlineRepresentative($originalValue->getInlineRepresentative());
 		} elseif (count($originalValue->getArguments()) === 1) {
-			$object = current($originalValue->getArguments());
-
-			if (is_object($object) && $object instanceof \Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject) {
-				$dataTransferObject = $object;
-			} else {
-				if ($this->dataTransferObjectFactory->hasDataTransferObject($object)) {
-					$dataTransferObject = $this->dataTransferObjectFactory->getDataTransferObject($object);
-				}
-			}
-			$content = ($dataTransferObject === NULL) ? NULL : $this->serializationService->process($dataTransferObject, $uriBuilder, $metaDataProcessorGroup);
-
+			$dataTransferObject = $this->geDataTransferObjectForInlineRepresentative(current($originalValue->getArguments()));
+		} elseif (count($originalValue->getArguments()) > 1) {
+			$dataTransferObject = $originalValue->getArguments();
 		}
+
+		$content = $this->serializationService->process($dataTransferObject, $uriBuilder, $metaDataProcessorGroup);
 
 		if ($content) {
 			$metaData['content'] = $content;
@@ -98,6 +91,31 @@ class UriPointerNestedObjectMetaDataProcessor extends \Netlogix\Crud\Domain\Serv
 		$alreadyIncluded[] = $processedValue;
 
 		return $metaData;
+	}
+
+	/**
+	 * @param $inlineRepresentative
+	 * @return array
+	 */
+	protected function geDataTransferObjectForInlineRepresentative($inlineRepresentative) {
+
+		if (is_array($inlineRepresentative)) {
+			$dataTransferObject = array();
+			foreach ($inlineRepresentative as $key => $value) {
+				$dataTransferObject[$key] = $this->geDataTransferObjectForInlineRepresentative($value);
+			}
+
+		} elseif (is_object($inlineRepresentative) && $inlineRepresentative instanceof \Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject) {
+			$dataTransferObject = $inlineRepresentative;
+
+		} elseif (is_object($inlineRepresentative)) {
+			if ($this->dataTransferObjectFactory->hasDataTransferObject($inlineRepresentative)) {
+				$dataTransferObject = $this->dataTransferObjectFactory->getDataTransferObject($inlineRepresentative);
+			}
+
+		}
+
+		return $dataTransferObject;
 	}
 
 }
