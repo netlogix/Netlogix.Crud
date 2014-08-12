@@ -66,11 +66,20 @@ class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\Per
 			 * Just add the innermostSelf directly to TypoLink and let this ObjectConverter
 			 * handle the wrapping.
 			 */
-			$source = array(
-				'innermostSelf' => array(
-					'__identity' => (!is_array($source) ? $source : $source['__identity']),
-				),
-			);
+			if (is_array($source)) {
+				$source['innermostSelf'] = array(
+					'__identity' => $source['__identity'],
+				);
+				unset($source['__identity']);
+
+			} else {
+				$source = array(
+					'innermostSelf' => array(
+						'__identity' => $source,
+					),
+				);
+
+			}
 			/** @var \TYPO3\Flow\Mvc\Controller\MvcPropertyMappingConfiguration $configuration */
 			$configuration->allowProperties('innermostSelf');
 			$configuration->setTypeConverterOption('TYPO3\\Flow\\Property\\TypeConverter\\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
