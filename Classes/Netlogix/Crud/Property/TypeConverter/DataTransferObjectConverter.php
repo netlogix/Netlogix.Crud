@@ -92,6 +92,11 @@ class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\Per
 			 * in both cases this should be an array that triggers several DTO setter
 			 * methods.
 			 */
+			if (!isset($source['innermostSelf'])) {
+				$source['innermostSelf'] = array(
+					'resource' => '',
+				);
+			}
 			return parent::convertFrom($source, $targetType, $convertedChildProperties, $configuration);
 
 		}
@@ -104,6 +109,31 @@ class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\Per
 	 */
 	public function canConvertFrom($source, $targetType) {
 		return true;
+	}
+
+	/**
+	 * Convert all properties in the source array
+	 *
+	 * @param mixed $source
+	 * @return array
+	 */
+	public function getSourceChildPropertiesToBeConverted($source) {
+		if (is_string($source)) {
+			$source = array(
+				'innermostSelf' => array(
+					'__identity' => $source,
+				)
+			);
+		} elseif (isset($source['__identity'])) {
+			$source['innermostSelf'] = array(
+				'__identity' => $source['__identity'],
+			);
+			unset($source['__identity']);
+		} elseif (!isset($source['innermostSelf'])) {
+			$source['innermostSelf'] = array();
+		}
+		$source = parent::getSourceChildPropertiesToBeConverted($source);
+		return $source;
 	}
 
 }

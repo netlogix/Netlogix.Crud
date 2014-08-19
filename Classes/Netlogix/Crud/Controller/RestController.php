@@ -97,9 +97,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * @return void
 	 */
 	public function initializeCreateAction() {
-		$propertyMappingConfiguration = $this->arguments[$this->resourceArgumentName]->getPropertyMappingConfiguration();
-		$propertyMappingConfiguration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
-		$propertyMappingConfiguration->allowAllProperties(TRUE);
+		$this->initializePropertyMappingConfigurationForCreateActions();
 	}
 
 	/**
@@ -108,9 +106,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * @return void
 	 */
 	public function initializeUpdateAction() {
-		$propertyMappingConfiguration = $this->arguments[$this->resourceArgumentName]->getPropertyMappingConfiguration();
-		$propertyMappingConfiguration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
-		$propertyMappingConfiguration->allowAllProperties(TRUE);
+		$this->initializePropertyMappingConfigurationForUpdateActions();
 	}
 
 	/**
@@ -119,9 +115,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * @return void
 	 */
 	public function initializeDeleteAction() {
-		$propertyMappingConfiguration = $this->arguments[$this->resourceArgumentName]->getPropertyMappingConfiguration();
-		$propertyMappingConfiguration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
-		$propertyMappingConfiguration->allowAllProperties('innermostSelf');
+		$this->initializePropertyMappingConfigurationForUpdateActions();
 	}
 
 	/**
@@ -130,9 +124,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * @return void
 	 */
 	public function initializeShowAction() {
-		$propertyMappingConfiguration = $this->arguments[$this->resourceArgumentName]->getPropertyMappingConfiguration();
-		$propertyMappingConfiguration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
-		$propertyMappingConfiguration->allowAllProperties('innermostSelf');
+		$this->initializePropertyMappingConfigurationForShowActions();
 	}
 
 	/**
@@ -161,5 +153,45 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		}
 		return parent::redirect($actionName, $controllerName, $packageKey, $arguments, $delay, $statusCode, $format);
 	}
+
+	/**
+	 * @return void
+	 */
+	protected function initializePropertyMappingConfigurationForShowActions() {
+
+		/** @var \TYPO3\Flow\Mvc\Controller\Argument $argument */
+		$argument = $this->arguments[$this->resourceArgumentName];
+
+		$configuration = $argument->getPropertyMappingConfiguration();
+		$configuration->allowProperties('innermostSelf');
+	}
+
+	/**
+	 * @return void
+	 */
+	protected function initializePropertyMappingConfigurationForUpdateActions() {
+
+		/** @var \TYPO3\Flow\Mvc\Controller\Argument $argument */
+		$argument = $this->arguments[$this->resourceArgumentName];
+
+		$configuration = $argument->getPropertyMappingConfiguration();
+		$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
+		$configuration->allowAllProperties(TRUE);
+	}
+
+	/**
+	 * @return void
+	 */
+	protected function initializePropertyMappingConfigurationForCreateActions() {
+		$this->initializePropertyMappingConfigurationForUpdateActions();
+
+		/** @var \TYPO3\Flow\Mvc\Controller\Argument $argument */
+		$argument = $this->arguments[$this->resourceArgumentName];
+
+		$configuration = $argument->getPropertyMappingConfiguration()->forProperty('innermostSelf');
+		$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
+	}
+
+
 
 }
