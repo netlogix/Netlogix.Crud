@@ -48,6 +48,7 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 	 */
 	public function __construct($innermostSelf) {
 		$this->innermostSelf = $innermostSelf;
+		$this->Persistence_Object_Identifier = \TYPO3\Flow\Core\Bootstrap::$staticObjectManager->get('TYPO3\\Flow\\Persistence\\PersistenceManagerInterface')->getIdentifierByObject($innermostSelf);
 	}
 
 	/**
