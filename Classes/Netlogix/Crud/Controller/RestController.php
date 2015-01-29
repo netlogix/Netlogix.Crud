@@ -88,7 +88,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 				break;
 			}
 		}
-		return parent::initializeActionMethodArguments();
+		parent::initializeActionMethodArguments();
 	}
 
 	/**
@@ -151,7 +151,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		if ($format === NULL) {
 			$format = '';
 		}
-		return parent::redirect($actionName, $controllerName, $packageKey, $arguments, $delay, $statusCode, $format);
+		parent::redirect($actionName, $controllerName, $packageKey, $arguments, $delay, $statusCode, $format);
 	}
 
 	/**

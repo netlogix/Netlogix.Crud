@@ -96,7 +96,7 @@ class DataTransferObjectFactory {
 	/**
 	 * Returns a DataTransferObject for the given object name.
 	 *
-	 * @param mixed$object
+	 * @param mixed $object
 	 * @return \Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject
 	 */
 	public function getDataTransferObject($object) {
