@@ -203,4 +203,22 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
 	}
 
+	public function errorAction() {
+		$validationResults = $this->arguments->getValidationResults()->getFlattenedErrors();
+		$result = array();
+		/** @var \TYPO3\Flow\Error\Error  $validationResult */
+		foreach ($validationResults as $key => $validationResult) {
+			/** @var \TYPO3\Flow\Validation\Error $error */
+			foreach ($validationResult as $error) {
+				$result['errors'][$key][] = array(
+					'code' => $error->getCode(),
+					'message' => $error->getMessage()
+				);
+			}
+		}
+		$result['success'] = false;
+		$this->view->assign('value', $result);
+		$this->response->setStatus(400);
+	}
+
 }
