@@ -40,15 +40,15 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 	/**
 	 * @ORM\Column(type="string", nullable=TRUE)
 	 */
-	protected $innermostSelf;
+	protected $payload;
 
 	/**
-	 * @param Object $innermostSelf
+	 * @param Object $payload
 	 * @return void
 	 */
-	public function __construct($innermostSelf) {
-		$this->innermostSelf = $innermostSelf;
-		$this->Persistence_Object_Identifier = \TYPO3\Flow\Core\Bootstrap::$staticObjectManager->get('TYPO3\\Flow\\Persistence\\PersistenceManagerInterface')->getIdentifierByObject($innermostSelf);
+	public function __construct($payload) {
+		$this->payload = $payload;
+		$this->Persistence_Object_Identifier = \TYPO3\Flow\Core\Bootstrap::$staticObjectManager->get('TYPO3\\Flow\\Persistence\\PersistenceManagerInterface')->getIdentifierByObject($payload);
 	}
 
 	/**
@@ -64,7 +64,7 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 	 *
 	 * @return Object
 	 */
-	abstract public function getInnermostSelf();
+	abstract public function getPayload();
 
 	/**
 	 * preventPropertyModification
@@ -138,7 +138,7 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 	/**
 	 * Magic __call method
 	 *
-	 * If the called method is valid for the innermostSelf object, it just
+	 * If the called method is valid for the payload object, it just
 	 * gets passed directly to it.
 	 *
 	 * @param string $methodName
@@ -146,11 +146,11 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 	 * @return mixed
 	 */
 	public function __call($methodName, $arguments) {
-		if (is_callable(array($this->getInnermostSelf(), $methodName))) {
-			return call_user_func_array(array($this->getInnermostSelf(), $methodName), $arguments);
+		if (is_callable(array($this->getPayload(), $methodName))) {
+			return call_user_func_array(array($this->getPayload(), $methodName), $arguments);
 		} elseif (substr($methodName, 0, 3) === 'get') {
 			try {
-				return \TYPO3\Flow\Reflection\ObjectAccess::getProperty($this->getInnermostSelf(), lcfirst(substr($methodName, 3)));
+				return \TYPO3\Flow\Reflection\ObjectAccess::getProperty($this->getPayload(), lcfirst(substr($methodName, 3)));
 			} catch (\TYPO3\Flow\Reflection\Exception\PropertyNotAccessibleException $e) {
 				return NULL;
 			}
@@ -163,7 +163,7 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 	 * @return string
 	 */
 	public function __toString() {
-		return \TYPO3\Flow\Core\Bootstrap::$staticObjectManager->get('TYPO3\\Flow\\Persistence\\PersistenceManagerInterface')->getIdentifierByObject($this->getInnermostSelf());
+		return \TYPO3\Flow\Core\Bootstrap::$staticObjectManager->get('TYPO3\\Flow\\Persistence\\PersistenceManagerInterface')->getIdentifierByObject($this->getPayload());
 	}
 
 }

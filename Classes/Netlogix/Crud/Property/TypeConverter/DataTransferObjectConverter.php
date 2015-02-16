@@ -62,38 +62,38 @@ class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\Per
 		} elseif (!is_array($source) || isset($source['__identity'])) {
 
 			/*
-			 * This situation usually indicates that RealURL covers the innermostSelf param.
-			 * Just add the innermostSelf directly to TypoLink and let this ObjectConverter
+			 * This situation usually indicates that RealURL covers the payload param.
+			 * Just add the payload directly to TypoLink and let this ObjectConverter
 			 * handle the wrapping.
 			 */
 			if (is_array($source)) {
-				$source['innermostSelf'] = array(
+				$source['payload'] = array(
 					'__identity' => $source['__identity'],
 				);
 				unset($source['__identity']);
 
 			} else {
 				$source = array(
-					'innermostSelf' => array(
+					'payload' => array(
 						'__identity' => $source,
 					),
 				);
 
 			}
 			/** @var \TYPO3\Flow\Mvc\Controller\MvcPropertyMappingConfiguration $configuration */
-			$configuration->allowProperties('innermostSelf');
+			$configuration->allowProperties('payload');
 			$configuration->setTypeConverterOption('TYPO3\\Flow\\Property\\TypeConverter\\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
 			return $this->propertyMapper->convert($source, $targetType, $configuration);
 
 		} else {
 			/*
-			 * This is default. There either is no innermostSelf a tall, which means this
+			 * This is default. There either is no payload a tall, which means this
 			 * is a POST request. Or there is one, which means this is a PUT request. But
 			 * in both cases this should be an array that triggers several DTO setter
 			 * methods.
 			 */
-			if (!isset($source['innermostSelf'])) {
-				$source['innermostSelf'] = array(
+			if (!isset($source['payload'])) {
+				$source['payload'] = array(
 					'resource' => '',
 				);
 			}
@@ -120,17 +120,17 @@ class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\Per
 	public function getSourceChildPropertiesToBeConverted($source) {
 		if (is_string($source)) {
 			$source = array(
-				'innermostSelf' => array(
+				'payload' => array(
 					'__identity' => $source,
 				)
 			);
 		} elseif (isset($source['__identity'])) {
-			$source['innermostSelf'] = array(
+			$source['payload'] = array(
 				'__identity' => $source['__identity'],
 			);
 			unset($source['__identity']);
-		} elseif (!isset($source['innermostSelf'])) {
-			$source['innermostSelf'] = array();
+		} elseif (!isset($source['payload'])) {
+			$source['payload'] = array();
 		}
 		$source = parent::getSourceChildPropertiesToBeConverted($source);
 		return $source;

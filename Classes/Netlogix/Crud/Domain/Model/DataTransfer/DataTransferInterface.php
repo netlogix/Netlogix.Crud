@@ -36,6 +36,6 @@ interface DataTransferInterface {
 	 *
 	 * @return Object
 	 */
-	public function getInnermostSelf();
+	public function getPayload();
 
 }

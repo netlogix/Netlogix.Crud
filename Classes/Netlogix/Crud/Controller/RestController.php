@@ -76,19 +76,30 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 				case 'POST' :
 				case 'PUT':
 					$arguments = $this->request->getArguments();
-					$arguments = array(
-						$this->resourceArgumentName => $arguments
-					);
-					if ($this->request->hasArgument($this->resourceArgumentName)) {
-						$innermostSelf = $this->request->getArgument($this->resourceArgumentName);
-						$arguments[$this->resourceArgumentName]['innermostSelf'] = $innermostSelf;
-						unset($arguments[$this->resourceArgumentName][$this->resourceArgumentName]);
+					if (!isset($arguments[$this->resourceArgumentName])) {
+						$arguments[$this->resourceArgumentName] = $this->parseRequestBody();
+						if ($this->request->hasArgument($this->resourceArgumentName)) {
+							$payload = $this->request->getArgument($this->resourceArgumentName);
+							$arguments[$this->resourceArgumentName]['payload'] = $payload;
+							unset($arguments[$this->resourceArgumentName][$this->resourceArgumentName]);
+						}
 					}
 				$this->request->setArguments($arguments);
 				break;
 			}
 		}
 		parent::initializeActionMethodArguments();
+	}
+
+	/**
+	 * @return array
+	 * @throws \TYPO3\Flow\Http\Exception
+	 */
+	protected function parseRequestBody() {
+		$propertyMappingConfiguration = new \TYPO3\Flow\Property\PropertyMappingConfiguration();
+		$propertyMappingConfiguration->setTypeConverter($this->objectManager->get('TYPO3\Flow\Property\TypeConverter\MediaTypeConverterInterface'));
+		$propertyMappingConfiguration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\MediaTypeConverterInterface', \TYPO3\Flow\Property\TypeConverter\MediaTypeConverterInterface::CONFIGURATION_MEDIA_TYPE, $this->request->getHttpRequest()->getHeader('Content-Type'));
+		return $this->objectManager->get('\TYPO3\Flow\Property\PropertyMapper')->convert($this->request->getHttpRequest()->getContent(), 'array', $propertyMappingConfiguration);
 	}
 
 	/**
@@ -163,7 +174,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		$argument = $this->arguments[$this->resourceArgumentName];
 
 		$configuration = $argument->getPropertyMappingConfiguration();
-		$configuration->allowProperties('innermostSelf');
+		$configuration->allowProperties('payload');
 	}
 
 	/**
@@ -188,10 +199,8 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		/** @var \TYPO3\Flow\Mvc\Controller\Argument $argument */
 		$argument = $this->arguments[$this->resourceArgumentName];
 
-		$configuration = $argument->getPropertyMappingConfiguration()->forProperty('innermostSelf');
+		$configuration = $argument->getPropertyMappingConfiguration()->forProperty('payload');
 		$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
 	}
-
-
 
 }
