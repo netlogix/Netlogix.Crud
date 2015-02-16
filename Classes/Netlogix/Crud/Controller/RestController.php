@@ -50,6 +50,12 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	protected $supportedMediaTypes = array('text/html', 'application/json');
 
 	/**
+	 * @Flow\Inject
+	 * @var \Netlogix\Crud\Domain\Service\DataTransferObjectFactory
+	 */
+	protected $dataTransferObjectFactory;
+
+	/**
 	 * Determines the action method and assures that the method exists.
 	 *
 	 * @return string The action method name
@@ -219,6 +225,27 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		$result['success'] = false;
 		$this->view->assign('value', $result);
 		$this->response->setStatus(400);
+	}
+
+	/**
+	 * @param object $payload
+	 * @param integer $statusCode
+	 * @throws \TYPO3\Flow\Mvc\Exception\StopActionException
+	 * @throws \TYPO3\Flow\Mvc\Routing\Exception\MissingActionNameException
+	 */
+	protected function reportSuccess($payload, $statusCode = 200) {
+		$this->uriBuilder->reset();
+		$this->uriBuilder->setFormat($this->request->getFormat());
+
+		$uri = $this->uriBuilder->setCreateAbsoluteUri(TRUE)->uriFor('index', array($this->resourceArgumentName => $payload), NULL, NULL, NULL);
+
+		$this->response->setStatus($statusCode);
+		$this->response->setHeader('Location', (string) $uri);
+
+		$this->view->assign('value', $this->dataTransferObjectFactory->getDataTransferObject($payload));
+		$this->response->setContent($this->view->render());
+
+		throw new \TYPO3\Flow\Mvc\Exception\StopActionException();
 	}
 
 }
