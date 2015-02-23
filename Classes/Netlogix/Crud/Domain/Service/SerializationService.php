@@ -194,6 +194,8 @@ class SerializationService {
 			return $object;
 		} elseif (is_array($object)) {
 			return $this->processCollectionType($object, array_keys($object));
+		} elseif ($object instanceof \DateTime) {
+			return $object->format(\TYPO3\Flow\Property\TypeConverter\DateTimeConverter::DEFAULT_DATE_FORMAT);
 		} elseif (is_object($object) && ($object instanceof \Doctrine\Common\Collections\ArrayCollection)) {
 			$arrayRepresentation = $object->toArray();
 			return $this->processCollectionType($arrayRepresentation, array_keys($arrayRepresentation));
