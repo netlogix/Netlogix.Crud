@@ -82,13 +82,12 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 				case 'POST' :
 				case 'PUT':
 					$arguments = $this->request->getArguments();
-					if (!isset($arguments[$this->resourceArgumentName])) {
-						$arguments[$this->resourceArgumentName] = $this->parseRequestBody();
-						if ($this->request->hasArgument($this->resourceArgumentName)) {
-							$payload = $this->request->getArgument($this->resourceArgumentName);
-							$arguments[$this->resourceArgumentName]['payload'] = $payload;
-							unset($arguments[$this->resourceArgumentName][$this->resourceArgumentName]);
-						}
+					$arguments[$this->resourceArgumentName] = array_merge_recursive($arguments[$this->resourceArgumentName], $this->parseRequestBody());
+					if ($this->isActionMethodArgumentDto($this->resourceArgumentName)) {
+						$payload = $this->request->getArgument($this->resourceArgumentName);
+						$arguments[$this->resourceArgumentName]['payload'] = $payload;
+						unset($arguments[$this->resourceArgumentName][$this->resourceArgumentName]);
+						unset($arguments[$this->resourceArgumentName]['__identity']);
 					}
 				$this->request->setArguments($arguments);
 				break;
@@ -192,8 +191,12 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		$argument = $this->arguments[$this->resourceArgumentName];
 
 		$configuration = $argument->getPropertyMappingConfiguration();
-		$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
 		$configuration->allowAllProperties(TRUE);
+		if ($this->isActionMethodArgumentDto($this->resourceArgumentName)) {
+			$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
+		} else {
+			$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED, TRUE);
+		}
 	}
 
 	/**
@@ -207,6 +210,17 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 
 		$configuration = $argument->getPropertyMappingConfiguration()->forProperty('payload');
 		$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
+	}
+
+	protected function isActionMethodArgumentDto($argumentName) {
+		$actionMethodParameters = static::getActionMethodParameters($this->objectManager);
+		if (isset($actionMethodParameters[$this->actionMethodName])) {
+			$methodParameters = $actionMethodParameters[$this->actionMethodName];
+		} else {
+			$methodParameters = array();
+		}
+
+		return isset($methodParameters[$argumentName]) ? is_a($methodParameters[$argumentName]['class'], \Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject::class, TRUE) : FALSE;
 	}
 
 	public function errorAction() {
