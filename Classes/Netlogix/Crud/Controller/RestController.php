@@ -82,6 +82,9 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 				case 'POST' :
 				case 'PUT':
 					$arguments = $this->request->getArguments();
+					if (!isset($arguments[$this->resourceArgumentName])) {
+						$arguments[$this->resourceArgumentName] = [];
+					}
 					$arguments[$this->resourceArgumentName] = array_merge_recursive($arguments[$this->resourceArgumentName], $this->parseRequestBody());
 					if ($this->isActionMethodArgumentDto($this->resourceArgumentName)) {
 						$payload = $this->request->getArgument($this->resourceArgumentName);
@@ -192,7 +195,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 
 		$configuration = $argument->getPropertyMappingConfiguration();
 		$configuration->allowAllProperties(TRUE);
-		if ($this->isActionMethodArgumentDto($this->resourceArgumentName)) {
+		if ($this->request->getHttpRequest()->getMethod() === 'POST') {
 			$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
 		} else {
 			$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED, TRUE);
