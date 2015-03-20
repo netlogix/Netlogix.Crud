@@ -19,7 +19,7 @@ use TYPO3\Flow\Annotations as Flow;
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  * @Flow\Scope("singleton")
  */
-class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter {
+class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\ObjectConverter {
 
 	/**
 	 * @var \TYPO3\Flow\Property\PropertyMapper

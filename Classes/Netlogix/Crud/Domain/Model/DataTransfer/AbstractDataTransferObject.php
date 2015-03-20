@@ -15,14 +15,6 @@ namespace Netlogix\Crud\Domain\Model\DataTransfer;
 use Doctrine\ORM\Mapping as ORM;
 use TYPO3\Flow\Annotations as Flow;
 
-/**
- *
- * @package Netlogix.Crud
- * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
- * @Flow\Scope("prototype")
- * @Flow\Entity
- * @ORM\InheritanceType("JOINED")
- */
 abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model\DataTransfer\DataTransferInterface {
 
 	/**

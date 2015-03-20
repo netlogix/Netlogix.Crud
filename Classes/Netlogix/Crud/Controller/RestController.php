@@ -85,12 +85,14 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 					if (!isset($arguments[$this->resourceArgumentName])) {
 						$arguments[$this->resourceArgumentName] = [];
 					}
-					$arguments[$this->resourceArgumentName] = array_merge_recursive($arguments[$this->resourceArgumentName], $this->parseRequestBody());
-					if ($this->isActionMethodArgumentDto($this->resourceArgumentName)) {
+					if ($this->isActionMethodArgumentDto($this->resourceArgumentName) && $this->request->hasArgument($this->resourceArgumentName)) {
 						$payload = $this->request->getArgument($this->resourceArgumentName);
+						$arguments[$this->resourceArgumentName] = $this->parseRequestBody();
 						$arguments[$this->resourceArgumentName]['payload'] = $payload;
 						unset($arguments[$this->resourceArgumentName][$this->resourceArgumentName]);
 						unset($arguments[$this->resourceArgumentName]['__identity']);
+					} else {
+						$arguments[$this->resourceArgumentName] = array_merge_recursive($arguments[$this->resourceArgumentName], $this->parseRequestBody());
 					}
 				$this->request->setArguments($arguments);
 				break;
