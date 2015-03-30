@@ -141,6 +141,9 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 		if (is_callable(array($this->getPayload(), $methodName))) {
 			return call_user_func_array(array($this->getPayload(), $methodName), $arguments);
 		} elseif (substr($methodName, 0, 3) === 'get') {
+			if (lcfirst(substr($methodName, 3)) == '__identity') {
+				return $this->Persistence_Object_Identifier;
+			}
 			try {
 				return \TYPO3\Flow\Reflection\ObjectAccess::getProperty($this->getPayload(), lcfirst(substr($methodName, 3)));
 			} catch (\TYPO3\Flow\Reflection\Exception\PropertyNotAccessibleException $e) {
