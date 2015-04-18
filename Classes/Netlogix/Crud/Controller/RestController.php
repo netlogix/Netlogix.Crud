@@ -12,7 +12,15 @@ namespace Netlogix\Crud\Controller;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
+use Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject;
+use Netlogix\Crud\View\JsonView;
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Mvc\Exception\StopActionException;
+use TYPO3\Flow\Property\PropertyMapper;
+use TYPO3\Flow\Property\PropertyMappingConfiguration;
+use TYPO3\Flow\Property\TypeConverter\MediaTypeConverterInterface;
+use TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter;
+use TYPO3\Fluid\View\TemplateView;
 
 /**
  * An action controller for RESTful web services
@@ -29,7 +37,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * @var string
 	 * @api
 	 */
-	protected $defaultViewObjectName = 'Netlogix\\Crud\\View\\JsonView';
+	protected $defaultViewObjectName = JsonView::class;
 
 	/**
 	 * A list of formats and object names of the views which should render them.
@@ -37,8 +45,8 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * @var array<string>
 	 */
 	protected $viewFormatToObjectNameMap = array(
-		'html' => 'TYPO3\\Fluid\\View\\TemplateView',
-		'json' => 'Netlogix\\Crud\\View\\JsonView',
+		'html' => TemplateView::class,
+		'json' => JsonView::class,
 	);
 
 	/**
@@ -77,7 +85,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * @see initializeArguments()
 	 */
 	public function initializeActionMethodArguments() {
-		if ($this->request->__previousControllerActionName  === 'index') {
+		if ($this->request->__previousControllerActionName === 'index') {
 			switch ($this->request->getHttpRequest()->getMethod()) {
 				case 'POST' :
 				case 'PUT':
@@ -106,10 +114,10 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * @throws \TYPO3\Flow\Http\Exception
 	 */
 	protected function parseRequestBody() {
-		$propertyMappingConfiguration = new \TYPO3\Flow\Property\PropertyMappingConfiguration();
-		$propertyMappingConfiguration->setTypeConverter($this->objectManager->get('TYPO3\Flow\Property\TypeConverter\MediaTypeConverterInterface'));
-		$propertyMappingConfiguration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\MediaTypeConverterInterface', \TYPO3\Flow\Property\TypeConverter\MediaTypeConverterInterface::CONFIGURATION_MEDIA_TYPE, $this->request->getHttpRequest()->getHeader('Content-Type'));
-		return $this->objectManager->get('\TYPO3\Flow\Property\PropertyMapper')->convert($this->request->getHttpRequest()->getContent(), 'array', $propertyMappingConfiguration);
+		$propertyMappingConfiguration = new PropertyMappingConfiguration();
+		$propertyMappingConfiguration->setTypeConverter($this->objectManager->get(MediaTypeConverterInterface::class));
+		$propertyMappingConfiguration->setTypeConverterOption(MediaTypeConverterInterface::class, MediaTypeConverterInterface::CONFIGURATION_MEDIA_TYPE, $this->request->getHttpRequest()->getHeader('Content-Type'));
+		return $this->objectManager->get(PropertyMapper::class)->convert($this->request->getHttpRequest()->getContent(), 'array', $propertyMappingConfiguration);
 	}
 
 	/**
@@ -164,7 +172,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * @param integer $statusCode (optional) The HTTP status code for the redirect. Default is "303 See Other"
 	 * @param string $format The format to use for the redirect URI
 	 * @return void
-	 * @throws \TYPO3\Flow\Mvc\Exception\StopActionException
+	 * @throws StopActionException
 	 * @see forward()
 	 * @api
 	 */
@@ -196,11 +204,11 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		$argument = $this->arguments[$this->resourceArgumentName];
 
 		$configuration = $argument->getPropertyMappingConfiguration();
-		$configuration->allowAllProperties(TRUE);
+		$configuration->allowAllProperties();
 		if ($this->request->getHttpRequest()->getMethod() === 'POST') {
-			$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
+			$configuration->setTypeConverterOption(PersistentObjectConverter::class, PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
 		} else {
-			$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED, TRUE);
+			$configuration->setTypeConverterOption(PersistentObjectConverter::class, PersistentObjectConverter::CONFIGURATION_MODIFICATION_ALLOWED, TRUE);
 		}
 	}
 
@@ -214,7 +222,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		$argument = $this->arguments[$this->resourceArgumentName];
 
 		$configuration = $argument->getPropertyMappingConfiguration()->forProperty('payload');
-		$configuration->setTypeConverterOption('TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
+		$configuration->setTypeConverterOption(PersistentObjectConverter::class, PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
 	}
 
 	protected function isActionMethodArgumentDto($argumentName) {
@@ -225,7 +233,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 			$methodParameters = array();
 		}
 
-		return isset($methodParameters[$argumentName]) ? is_a($methodParameters[$argumentName]['class'], \Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject::class, TRUE) : FALSE;
+		return isset($methodParameters[$argumentName]) ? is_a($methodParameters[$argumentName]['type'], AbstractDataTransferObject::class, TRUE) : FALSE;
 	}
 
 	public function errorAction() {
@@ -249,7 +257,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	/**
 	 * @param object $payload
 	 * @param integer $statusCode
-	 * @throws \TYPO3\Flow\Mvc\Exception\StopActionException
+	 * @throws StopActionException
 	 * @throws \TYPO3\Flow\Mvc\Routing\Exception\MissingActionNameException
 	 */
 	protected function reportSuccess($payload, $statusCode = 200) {
@@ -264,7 +272,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		$this->view->assign('value', $this->dataTransferObjectFactory->getDataTransferObject($payload));
 		$this->response->setContent($this->view->render());
 
-		throw new \TYPO3\Flow\Mvc\Exception\StopActionException();
+		throw new StopActionException();
 	}
 
 }
