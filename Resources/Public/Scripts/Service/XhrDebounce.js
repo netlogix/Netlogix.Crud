@@ -1,7 +1,7 @@
 (function (window, angular, undefined) {
 	'use strict';
 
-	var module = angular.module('nxcrudextbase.xhrdebounce', []);
+	var module = angular.module('netlogix.crud.service.xhrdebounce', []);
 	var XhrDebounce;
 
 	/**

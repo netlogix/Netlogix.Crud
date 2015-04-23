@@ -1,7 +1,7 @@
 (function (window, angular, undefined) {
 	'use strict';
 
-	var app = angular.module('nxcrudextbase.heatosprovider', []),
+	var module = angular.module('netlogix.crud.service.hateoassprovider', []),
 		removeAnchorContentSuffixesRecursively;
 
 	/**
@@ -9,10 +9,10 @@
 	 *
 	 * This feels unhandy, since the $httpProvider isn't a scope instance but a global
 	 * singleton. So adjusting the httpProvider needs to be done only once. Currently
-	 * every package requiring the heatosprovider adds the interceptor again.
+	 * every package requiring the hateoassprovider adds the interceptor again.
 	 */
 
-	app.config(['$httpProvider', function ($httpProvider) {
+	module.config(['$httpProvider', function ($httpProvider) {
 
 		/*
 		 * HATEOAS!
@@ -44,7 +44,7 @@
 		 *   > actions the client may take are discovered within resource representations
 		 *   > returned from the server.
 		 */
-		$httpProvider.interceptors.push(function($q) {
+		$httpProvider.interceptors.push(function() {
 			return {
 				request: function(config) {
 					var propertyName;
@@ -109,7 +109,8 @@
 			}
 		});
 
-		while (contentKey = remove.pop()) {
+		while (remove.length) {
+			contentKey = remove.pop();
 			if (angular.isFunction(input[contentKey].toString)) {
 				resourceKey = contentKey.replace(/^([^#]+)#content$/g, '$1');
 				input[resourceKey] = input[resourceKey].toString();

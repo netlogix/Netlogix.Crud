@@ -1,7 +1,7 @@
 (function (window, angular, undefined) {
 	'use strict';
 
-	var app = angular.module('nxcrudextbase.uripointer', []);
+	var app = angular.module('netlogix.crud.service.uripointer', []);
 
 	var getCache = function($cacheFactory) {
 		return $cacheFactory.get('GenericUriPointer') || $cacheFactory('GenericUriPointer');
