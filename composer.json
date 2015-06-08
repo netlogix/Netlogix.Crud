@@ -1,13 +1,13 @@
 {
-	"name": "netlogix\/crud",
-	"type": "typo3-flow-package",
-	"version": "0.1",
-	"require": {
-		"typo3\/flow": "*"
-	},
-	"autoload": {
-		"psr-0": {
-			"Netlogix\\Crud": "Classes"
-		}
-	}
+    "name": "netlogix\/crud",
+    "type": "typo3-flow-package",
+    "description": "netlogix Crud Package",
+    "require": {
+        "typo3\/flow": "*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Netlogix\\Crud": "Classes"
+        }
+    }
 }
