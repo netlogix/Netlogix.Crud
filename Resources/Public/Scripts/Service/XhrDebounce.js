@@ -1,4 +1,5 @@
-(function (window, angular, undefined) {
+/*global angular:false */
+(function(window, angular, undefined) {
 	'use strict';
 
 	var module = angular.module('netlogix.crud.service.xhrdebounce', []);
@@ -7,34 +8,31 @@
 	/**
 	 * The $httpBackend is wrapped by the xhrDebounce.invoke method.
 	 */
-	module.config(['$provide', function ($provide) {
-
+	module.config(['$provide', function($provide) {
 		$provide.decorator('$httpBackend', function($delegate) {
-
 			return function(method, url, post, callback, headers, timeout, withCredentials, responseType) {
-				return XhrDebounce.invoke($delegate, method, url, post, callback, headers, timeout, withCredentials, responseType);
+				return XhrDebounce.invoke($delegate, method, url, post,
+					callback, headers, timeout, withCredentials, responseType);
 			};
-
 		});
-
 	}]);
 
 	/**
 	 * This initial "run" is required. Otherwise the local-scope xhrDebounce object
 	 * isn't available and the $httpBackend runs into trouble.
 	 */
-	module.run(['nxcrudextbase.XhrDebounce', function(xhrDebounce) {
-
+	module.run(['netlogix.crud.XhrDebounce', function(xhrDebounce) {
 		XhrDebounce = xhrDebounce;
-		return;
-
 	}]);
 
 	/**
 	 * The xhrDebounce object knows which URL/method combination need to be debounced
 	 * and keeps track of the request stack.
 	 */
-	module.service('nxcrudextbase.XhrDebounce', ['$timeout', '$q', function($timeout, $q) {
+	module.service('netlogix.crud.XhrDebounce', XhrDebounceService);
+
+	XhrDebounceService.$inject = ['$timeout', '$q'];
+	function XhrDebounceService($timeout, $q) {
 
 		var timers = {};
 		var deferred = $q.defer();
@@ -50,10 +48,10 @@
 
 				} else {
 					var signature = method + url;
-					if (timers[signature] == undefined) {
+					if (timers[signature] === undefined) {
 						timers[signature] = {
 							stackSize: 0,
-							delay: (delay == undefined) ? 500 : delay
+							delay: (delay === undefined) ? 500 : delay
 						};
 					}
 
@@ -68,7 +66,7 @@
 
 				} else {
 					var signature = url + method;
-					if (timers[signature] != undefined) {
+					if (timers[signature] !== undefined) {
 						delete timers[signature];
 					}
 
@@ -82,17 +80,17 @@
 					$delegate(method, url, post, callback, headers, timeout, withCredentials, responseType);
 
 				} else {
-					timers[signature]['stackSize']++;
+					timers[signature].stackSize++;
 					$timeout(function() {
-						timers[signature]['stackSize']--;
-						if (timers[signature]['stackSize'] == 0) {
+						timers[signature].stackSize--;
+						if (timers[signature].stackSize === 0) {
 							$delegate(method, url, post, callback, headers, timeout, withCredentials, responseType);
 
 						} else {
 							$delegate(method, url, post, callback, headers, deferred.promise, withCredentials, responseType);
 
 						}
-					}, timers[signature]['delay']);
+					}, timers[signature].delay);
 
 				}
 
@@ -100,6 +98,6 @@
 		};
 		return xhrDebounce;
 
-	}]);
+	}
 
 }(window, angular));

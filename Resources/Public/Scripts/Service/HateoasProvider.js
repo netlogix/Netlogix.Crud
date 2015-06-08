@@ -1,8 +1,8 @@
-(function (window, angular, undefined) {
+/*global angular:false *//* jshint maxstatements:false */
+(function(window, angular, undefined) {
 	'use strict';
 
-	var module = angular.module('netlogix.crud.service.hateoassprovider', []),
-		removeAnchorContentSuffixesRecursively;
+	var module = angular.module('netlogix.crud.service.hateoassprovider', []);
 
 	/**
 	 * FIXME: Make a "global singleton"
@@ -12,7 +12,7 @@
 	 * every package requiring the hateoassprovider adds the interceptor again.
 	 */
 
-	module.config(['$httpProvider', function ($httpProvider) {
+	module.config(['$httpProvider', function($httpProvider) {
 
 		/*
 		 * HATEOAS!
@@ -96,7 +96,7 @@
 	 * @param input
 	 * @returns {*}
 	 */
-	removeAnchorContentSuffixesRecursively = function(input) {
+	function removeAnchorContentSuffixesRecursively(input) {
 
 		if (angular.isFunction(input) || (!angular.isObject(input) && !angular.isArray(input))) {
 			return input;
@@ -119,6 +119,6 @@
 		}
 
 		return input;
-	};
+	}
 
 }(window, angular));

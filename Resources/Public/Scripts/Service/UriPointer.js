@@ -1,4 +1,5 @@
-(function (window, angular, undefined) {
+/*global angular:false *//* jshint maxstatements:false */
+(function(window, angular, undefined) {
 	'use strict';
 
 	var app = angular.module('netlogix.crud.service.uripointer', []);
@@ -6,13 +7,17 @@
 	var getCache = function($cacheFactory) {
 		return $cacheFactory.get('GenericUriPointer') || $cacheFactory('GenericUriPointer');
 	};
+	app.factory('netlogix.crud.GenericUriPointer', GenericUriPointerFactory);
+	app.factory('netlogix.crud.UriListPointer', UriListPointerFactory);
+	app.factory('netlogix.crud.UriObjectPointer', UriObjectPointerFactory);
 
 	/**
 	 * UriListPointer targets a single target object, like a user.
 	 *
 	 * It is meant to be an actual object, extending "{}".
 	 */
-	app.factory('nxcrudextbase.GenericUriPointer', ['$q', '$http', '$cacheFactory', function($q, $http, $cacheFactory) {
+	GenericUriPointerFactory.$inject = ['$q', '$http', '$cacheFactory'];
+	function GenericUriPointerFactory($q, $http, $cacheFactory) {
 
 		var deferredCache = getCache($cacheFactory);
 
@@ -22,12 +27,13 @@
 		 *
 		 * @param resource
 		 * @param content
+		 * @param ResourceFactory
 		 * @constructor
 		 */
 		var GenericUriPointer = function(resource, content, ResourceFactory) {
 
 			this.$$resource = resource || 'about:blank';
-			this.$$resourceFactory = angular.isFunction(ResourceFactory) ? ResourceFactory(this.$$resource) : undefined;
+			this.$$resourceFactory = angular.isFunction(ResourceFactory) ? new ResourceFactory(this.$$resource) : undefined;
 
 			if (content) {
 				this.override(content);
@@ -53,10 +59,8 @@
 		 * Usually the override method gets triggered by the initialize method
 		 * right after the remote resource has been fetched, or just inside
 		 * of the construct method when pre-fetched data has been passed.
-		 *
-		 * @param content
 		 */
-		GenericUriPointer.prototype.override = function(content) {
+		GenericUriPointer.prototype.override = function() {
 			throw 'The method "override" is not provided by the "GenericUriPointer".';
 		};
 
@@ -102,15 +106,15 @@
 		};
 
 		return GenericUriPointer;
-
-	}]);
+	}
 
 	/**
 	 * The UriObjectPointer targets a list of things.
 	 *
 	 * It is meant to be an array, extending the "[]".
 	 */
-	app.factory('nxcrudextbase.UriListPointer', ['$q', '$http', '$cacheFactory', 'nxcrudextbase.GenericUriPointer', function($q, $http, $cacheFactory, GenericUriPointer) {
+	UriListPointerFactory.$inject = ['$q', '$http', '$cacheFactory', 'netlogix.crud.GenericUriPointer'];
+	function UriListPointerFactory($q, $http, $cacheFactory, GenericUriPointer) {
 
 		var deferredCache = getCache($cacheFactory);
 
@@ -120,12 +124,12 @@
 		 *
 		 * @param resource
 		 * @param content
-		 * @constructor
+		 * @param ResourceFactory
 		 */
 		var UriListPointer = function(resource, content, ResourceFactory) {
 
 			this.$$resource = resource || 'about:blank';
-			this.$$resourceFactory = angular.isFunction(ResourceFactory) ? ResourceFactory(this.$$resource) : undefined;
+			this.$$resourceFactory = angular.isFunction(ResourceFactory) ? new ResourceFactory(this.$$resource) : undefined;
 
 			if (content) {
 				this.override(content);
@@ -149,7 +153,11 @@
 				deferredCache.put(this.$$resource, deferred);
 			}
 
-			while ($this.pop()) {};
+			/* jshint noempty:false */
+			while ($this.pop()) {
+				// Clear array without creating a new reference
+			}
+
 			angular.forEach(content, function(value) {
 				if (angular.isFunction($this.$$resourceFactory)) {
 					value = new $this.$$resourceFactory(value);
@@ -175,14 +183,15 @@
 
 		return UriListPointer;
 
-	}]);
+	}
 
 	/**
 	 * UriListPointer targets a single target object, like a user.
 	 *
 	 * It is meant to be an actual object, extending "{}".
 	 */
-	app.factory('nxcrudextbase.UriObjectPointer', ['$q', '$http', '$cacheFactory', 'nxcrudextbase.GenericUriPointer', function($q, $http, $cacheFactory, GenericUriPointer) {
+	UriObjectPointerFactory.$inject = ['$q', '$cacheFactory', 'netlogix.crud.GenericUriPointer'];
+	function UriObjectPointerFactory($q, $cacheFactory, GenericUriPointer) {
 
 		var deferredCache = getCache($cacheFactory);
 
@@ -192,12 +201,12 @@
 		 *
 		 * @param resource
 		 * @param content
-		 * @constructor
+		 * @param ResourceFactory
 		 */
 		var UriObjectPointer = function(resource, content, ResourceFactory) {
 
 			this.$$resource = resource || 'about:blank';
-			this.$$resourceFactory = angular.isFunction(ResourceFactory) ? ResourceFactory(this.$$resource) : undefined;
+			this.$$resourceFactory = angular.isFunction(ResourceFactory) ? new ResourceFactory(this.$$resource) : undefined;
 
 			if (content) {
 				this.override(content);
@@ -240,7 +249,7 @@
 
 		return UriObjectPointer;
 
-	}]);
+	}
 
 
 }(window, angular));
