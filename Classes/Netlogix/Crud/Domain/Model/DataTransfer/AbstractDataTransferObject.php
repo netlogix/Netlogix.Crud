@@ -14,8 +14,16 @@ namespace Netlogix\Crud\Domain\Model\DataTransfer;
 
 use Doctrine\ORM\Mapping as ORM;
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Core\Bootstrap;
+use TYPO3\Flow\Http\Request;
+use TYPO3\Flow\Mvc\ActionRequest;
+use TYPO3\Flow\Mvc\Routing\UriBuilder;
+use TYPO3\Flow\Persistence\PersistenceManagerInterface;
+use TYPO3\Flow\Property\Exception;
+use TYPO3\Flow\Reflection\Exception\PropertyNotAccessibleException;
+use TYPO3\Flow\Reflection\ObjectAccess;
 
-abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model\DataTransfer\DataTransferInterface {
+abstract class AbstractDataTransferObject implements DataTransferInterface {
 
 	/**
 	 * @var \TYPO3\Flow\Object\ObjectManagerInterface
@@ -36,11 +44,10 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 
 	/**
 	 * @param Object $payload
-	 * @return void
 	 */
 	public function __construct($payload) {
 		$this->payload = $payload;
-		$this->Persistence_Object_Identifier = \TYPO3\Flow\Core\Bootstrap::$staticObjectManager->get('TYPO3\\Flow\\Persistence\\PersistenceManagerInterface')->getIdentifierByObject($payload);
+		$this->Persistence_Object_Identifier = Bootstrap::$staticObjectManager->get(PersistenceManagerInterface::class)->getIdentifierByObject($payload);
 	}
 
 	/**
@@ -61,28 +68,27 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 	/**
 	 * preventPropertyModification
 	 *
-	 * @param $propertyName string
-	 * @param $value mixed
-	 * @return void
+	 * @param string $propertyName
+	 * @param mixed $value
+	 * @throws Exception
 	 */
 	protected function preventPropertyModification($propertyName, $value) {
 		if ($this->getPropertyValue($propertyName) != $value) {
-			throw new \TYPO3\Flow\Property\Exception(sprintf('The property "%s" must not be changed.', $propertyName), 1387294954);
+			throw new Exception(sprintf('The property "%s" must not be changed.', $propertyName), 1387294954);
 		}
 	}
 
 	/**
 	 * isPropertyManipulationReal
 	 *
-	 * @param $propertyName string
-	 * @param $value mixed
+	 * @param string $propertyName
 	 * @return boolean
 	 */
 	protected function getPropertyValue($propertyName) {
 
-		$originalValue = \TYPO3\Flow\Reflection\ObjectAccess::getProperty($this, $propertyName);
+		$originalValue = ObjectAccess::getProperty($this, $propertyName);
 
-		if ($originalValue instanceof \Netlogix\Crud\Domain\Model\DataTransfer\UriPointer) {
+		if ($originalValue instanceof UriPointer) {
 			/*
 			 * UriPointer objects need to be transformed into the actual URI. Since this relies on
 			 * an UriBuilder being bound to a \TYPO3\Flow\Http\Request object, this is no
@@ -99,22 +105,21 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 	/**
 	 * getUriForUriPointer
 	 *
-	 * @param \Netlogix\Crud\Domain\Model\DataTransfer\UriPointer $uriPointer
+	 * @param UriPointer $uriPointer
 	 * @return string
 	 */
-	private static function getUriForUriPointer(\Netlogix\Crud\Domain\Model\DataTransfer\UriPointer $uriPointer) {
+	private static function getUriForUriPointer(UriPointer $uriPointer) {
 
 		static $uriBuilder;
 		if (!$uriBuilder) {
-
 			/** @var \TYPO3\Flow\Object\ObjectManagerInterface $objectManager */
-			$objectManager = \TYPO3\Flow\Core\Bootstrap::$staticObjectManager;
+			$objectManager = Bootstrap::$staticObjectManager;
 
-			/** @var \TYPO3\Flow\Http\Request $request */
-			$request = new \TYPO3\Flow\Mvc\ActionRequest(\TYPO3\Flow\Http\Request::createFromEnvironment());
+			/** @var ActionRequest $request */
+			$request = new ActionRequest(Request::createFromEnvironment());
 
-			/** @var \TYPO3\Flow\Mvc\Routing\UriBuilder $uriBuilder */
-			$uriBuilder = $objectManager->get('TYPO3\\Flow\\Mvc\\Routing\\UriBuilder');
+			/** @var UriBuilder $uriBuilder */
+			$uriBuilder = $objectManager->get(UriBuilder::class);
 			$uriBuilder->setRequest($request);
 
 		}
@@ -138,15 +143,15 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 	 * @return mixed
 	 */
 	public function __call($methodName, $arguments) {
-		if (is_callable(array($this->getPayload(), $methodName))) {
-			return call_user_func_array(array($this->getPayload(), $methodName), $arguments);
+		if (is_callable([$this->getPayload(), $methodName])) {
+			return call_user_func_array([$this->getPayload(), $methodName], $arguments);
 		} elseif (substr($methodName, 0, 3) === 'get') {
 			if (lcfirst(substr($methodName, 3)) == '__identity') {
 				return $this->Persistence_Object_Identifier;
 			}
 			try {
-				return \TYPO3\Flow\Reflection\ObjectAccess::getProperty($this->getPayload(), lcfirst(substr($methodName, 3)));
-			} catch (\TYPO3\Flow\Reflection\Exception\PropertyNotAccessibleException $e) {
+				return ObjectAccess::getProperty($this->getPayload(), lcfirst(substr($methodName, 3)));
+			} catch (PropertyNotAccessibleException $e) {
 				return NULL;
 			}
 		} else {
@@ -158,7 +163,7 @@ abstract class AbstractDataTransferObject implements \Netlogix\Crud\Domain\Model
 	 * @return string
 	 */
 	public function __toString() {
-		return \TYPO3\Flow\Core\Bootstrap::$staticObjectManager->get('TYPO3\\Flow\\Persistence\\PersistenceManagerInterface')->getIdentifierByObject($this->getPayload());
+		return Bootstrap::$staticObjectManager->get(PersistenceManagerInterface::class)->getIdentifierByObject($this->getPayload());
 	}
 
 }

@@ -12,7 +12,11 @@ namespace Netlogix\Crud\Domain\Service\MetaDataProcessor;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
+use Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject;
+use Netlogix\Crud\Domain\Model\DataTransfer\UriPointer;
+use Netlogix\Crud\Domain\Service\MetaDataProcessor\AbstractMetaDataProcessor;
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Reflection\ObjectAccess;
 
 /**
  * Enhances Json output by some meta data
@@ -21,7 +25,7 @@ use TYPO3\Flow\Annotations as Flow;
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  *
  */
-class UriPointerNestedObjectMetaDataProcessor extends \Netlogix\Crud\Domain\Service\MetaDataProcessor\AbstractMetaDataProcessor {
+class UriPointerNestedObjectMetaDataProcessor extends AbstractMetaDataProcessor {
 
 	/**
 	 * @var \TYPO3\Flow\Http\Client\Browser
@@ -57,7 +61,7 @@ class UriPointerNestedObjectMetaDataProcessor extends \Netlogix\Crud\Domain\Serv
 	 * @param array $metaData
 	 * @param string $propertyPath
 	 * @param mixed $processedValue
-	 * @param array $upstreamStorage
+	 * @param array $alreadyIncluded
 	 * @param mixed $object
 	 * @param \TYPO3\Flow\Mvc\Routing\UriBuilder $uriBuilder
 	 * @param string $metaDataProcessorGroup
@@ -68,9 +72,9 @@ class UriPointerNestedObjectMetaDataProcessor extends \Netlogix\Crud\Domain\Serv
 			return $metaData;
 		}
 
-		/** @var \Netlogix\Crud\Domain\Model\DataTransfer\UriPointer $originalValue */
-		$originalValue = \TYPO3\Flow\Reflection\ObjectAccess::getPropertyPath($object, $propertyPath);
-		if (!is_object($originalValue) || !($originalValue instanceof \Netlogix\Crud\Domain\Model\DataTransfer\UriPointer)) {
+		/** @var UriPointer $originalValue */
+		$originalValue = ObjectAccess::getPropertyPath($object, $propertyPath);
+		if (!is_object($originalValue) || !($originalValue instanceof UriPointer)) {
 			return $metaData;
 		}
 
@@ -98,14 +102,13 @@ class UriPointerNestedObjectMetaDataProcessor extends \Netlogix\Crud\Domain\Serv
 	 * @return array
 	 */
 	protected function geDataTransferObjectForInlineRepresentative($inlineRepresentative) {
-
+		$dataTransferObject = [];
 		if (is_array($inlineRepresentative)) {
-			$dataTransferObject = array();
 			foreach ($inlineRepresentative as $key => $value) {
 				$dataTransferObject[$key] = $this->geDataTransferObjectForInlineRepresentative($value);
 			}
 
-		} elseif (is_object($inlineRepresentative) && $inlineRepresentative instanceof \Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject) {
+		} elseif (is_object($inlineRepresentative) && $inlineRepresentative instanceof AbstractDataTransferObject) {
 			$dataTransferObject = $inlineRepresentative;
 
 		} elseif (is_object($inlineRepresentative)) {

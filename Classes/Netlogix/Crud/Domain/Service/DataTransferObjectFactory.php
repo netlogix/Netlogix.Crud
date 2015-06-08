@@ -13,6 +13,8 @@ namespace Netlogix\Crud\Domain\Service;
  *                                                                        */
 
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Property\Exception\InvalidTargetException;
+use TYPO3\Flow\Utility\TypeHandling;
 
 /**
  * Gets DTOs from given Non-DTOs.
@@ -23,12 +25,6 @@ use TYPO3\Flow\Annotations as Flow;
  * @Flow\Scope("singleton")
  */
 class DataTransferObjectFactory {
-
-	/**
-	 * @var \TYPO3\Flow\Reflection\ReflectionService
-	 * @Flow\Inject
-	 */
-	protected $reflectionService;
 
 	/**
 	 * @var \TYPO3\Flow\Persistence\PersistenceManagerInterface
@@ -45,15 +41,15 @@ class DataTransferObjectFactory {
 	/**
 	 * @var array
 	 */
-	protected $classMappingConfiguration = array();
+	protected $classMappingConfiguration = [];
 
 	/**
 	 * @var array
 	 */
-	protected $classNameToDtoClassNameReplaceFragments = array(
+	protected $classNameToDtoClassNameReplaceFragments = [
 		'\\Domain\\Model\\DataTransfer\\' => '\\Domain\\Model\\',
 		'\\Domain\\Model\\Dto\\' => '\\Domain\\Model\\',
-	);
+	];
 
 	/**
 	 * Returns TRUE if there is a DataTransferObject class for the given
@@ -71,10 +67,10 @@ class DataTransferObjectFactory {
 	 *
 	 * @param $object
 	 * @return string
-	 * @throws \TYPO3\Flow\Property\Exception\InvalidTargetException
+	 * @throws InvalidTargetException
 	 */
 	public function getDataTransferObjectName($object) {
-		$objectName = $this->reflectionService->getClassNameByObject($object);
+		$objectName = TypeHandling::getTypeForValue($object);
 
 		if (!array_key_exists($objectName, $this->classMappingConfiguration)) {
 			foreach ($this->classNameToDtoClassNameReplaceFragments as $dtoClassNameFragment => $classNameFragment) {
@@ -87,7 +83,7 @@ class DataTransferObjectFactory {
 		}
 
 		if (!isset($this->classMappingConfiguration[$objectName])) {
-			throw new \TYPO3\Flow\Property\Exception\InvalidTargetException(sprintf('There is no DTO class name for "%s" objects.', $objectName), 1407499486);
+			throw new InvalidTargetException(sprintf('There is no DTO class name for "%s" objects.', $objectName), 1407499486);
 		}
 
 		return $this->classMappingConfiguration[$objectName];
@@ -110,7 +106,7 @@ class DataTransferObjectFactory {
 	 * @return array<\Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject>
 	 */
 	public function getDataTransferObjects($objects) {
-		$result = array();
+		$result = [];
 		foreach ($objects as $key => $object) {
 			$result[$key] = $this->getDataTransferObject($object);
 		}

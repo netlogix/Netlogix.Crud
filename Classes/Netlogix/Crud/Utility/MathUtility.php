@@ -36,7 +36,7 @@ class MathUtility {
 		if ($var === '' || is_object($var) || is_array($var)) {
 			return FALSE;
 		}
-		return (string) intval($var) === (string) $var;
+		return (string)intval($var) === (string)$var;
 	}
 
 }

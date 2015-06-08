@@ -12,7 +12,16 @@ namespace Netlogix\Crud\Domain\Service;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Netlogix\Crud\Domain\Model\DataTransfer\DataTransferInterface;
+use Netlogix\Crud\Domain\Model\DataTransfer\UriPointer;
+use Netlogix\Crud\Utility\ArrayUtility;
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Configuration\ConfigurationManager;
+use TYPO3\Flow\Mvc\Routing\UriBuilder;
+use TYPO3\Flow\Property\TypeConverter\DateTimeConverter;
+use TYPO3\Flow\Reflection\ObjectAccess;
+use TYPO3\Flow\Utility\Arrays;
 
 /**
  * Transforms serializable targets to arrays that can be handled by json_serialize().
@@ -33,7 +42,7 @@ class SerializationService {
 	protected $metaDataPropertyNamePattern = '%s#%s';
 
 	/**
-	 * @var \TYPO3\Flow\Mvc\Routing\UriBuilder
+	 * @var UriBuilder
 	 */
 	protected $uriBuilder;
 
@@ -44,10 +53,10 @@ class SerializationService {
 	 *
 	 * @var array
 	 */
-	protected $propertyPath = array();
+	protected $propertyPath = [];
 
 	/**
-	 * @var \TYPO3\Flow\Configuration\ConfigurationManager
+	 * @var ConfigurationManager
 	 * @Flow\Inject
 	 */
 	protected $configurationManager;
@@ -78,7 +87,7 @@ class SerializationService {
 	/**
 	 * @var array
 	 */
-	protected $metaDataProcessors = array();
+	protected $metaDataProcessors = [];
 
 	/**
 	 * This common storage is used by MetaDataProcessors to communicate between different calls.
@@ -87,7 +96,7 @@ class SerializationService {
 	 *
 	 * @var array
 	 */
-	protected $metaDataProcessorStorage = array();
+	protected $metaDataProcessorStorage = [];
 
 	/**
 	 * @var string
@@ -102,7 +111,7 @@ class SerializationService {
 	/**
 	 * @var array
 	 */
-	private $formerConfigurationStack = array();
+	private $formerConfigurationStack = [];
 
 	/**
 	 * Returns JsonEncode of the given object.
@@ -110,11 +119,11 @@ class SerializationService {
 	 * them.
 	 *
 	 * @param $object
-	 * @param \TYPO3\Flow\Mvc\Routing\UriBuilder $uriBuilder
+	 * @param UriBuilder $uriBuilder
 	 * @param string $metaDataProcessorGroup
 	 * @return string
 	 */
-	public function jsonEncode($object, \TYPO3\Flow\Mvc\Routing\UriBuilder $uriBuilder, $metaDataProcessorGroup = NULL) {
+	public function jsonEncode($object, UriBuilder $uriBuilder, $metaDataProcessorGroup = NULL) {
 
 		return json_encode($this->process($object, $uriBuilder, $metaDataProcessorGroup));
 
@@ -125,11 +134,11 @@ class SerializationService {
 	 * The processing mechanism is another method.
 	 *
 	 * @param $object
-	 * @param \TYPO3\Flow\Mvc\Routing\UriBuilder $uriBuilder
+	 * @param UriBuilder $uriBuilder
 	 * @param string $metaDataProcessorGroup
 	 * @return mixed
 	 */
-	public function process($object, \TYPO3\Flow\Mvc\Routing\UriBuilder $uriBuilder, $metaDataProcessorGroup = NULL) {
+	public function process($object, UriBuilder $uriBuilder, $metaDataProcessorGroup = NULL) {
 
 		$formerConfigurationStackAttributes = array(
 			'cacheTagService',
@@ -142,7 +151,7 @@ class SerializationService {
 		/*
 		 * Remember previous state
 		 */
-		array_unshift($this->formerConfigurationStack, array());
+		array_unshift($this->formerConfigurationStack, []);
 		foreach ($formerConfigurationStackAttributes as $formerConfigurationStackAttribute) {
 			$this->formerConfigurationStack[0][$formerConfigurationStackAttribute] = $this->{$formerConfigurationStackAttribute};
 		}
@@ -151,7 +160,7 @@ class SerializationService {
 		 * Initialize
 		 */
 		$this->uriBuilder = $uriBuilder;
-		$this->propertyPath = array();
+		$this->propertyPath = [];
 		$this->initializeMetaDataProcessors($metaDataProcessorGroup);
 
 		/*
@@ -185,27 +194,26 @@ class SerializationService {
 	/**
 	 * Dispatcher which kind of processing has to be done.
 	 *
-	 * @param $object
+	 * @param mixed $object
 	 * @return mixed
 	 */
 	protected function processInternal($object) {
-
 		if (is_scalar($object)) {
 			return $object;
 		} elseif (is_array($object)) {
 			return $this->processCollectionType($object, array_keys($object));
 		} elseif ($object instanceof \DateTime) {
-			return $object->format(\TYPO3\Flow\Property\TypeConverter\DateTimeConverter::DEFAULT_DATE_FORMAT);
-		} elseif (is_object($object) && ($object instanceof \Doctrine\Common\Collections\ArrayCollection)) {
+			return $object->format(DateTimeConverter::DEFAULT_DATE_FORMAT);
+		} elseif (is_object($object) && ($object instanceof ArrayCollection)) {
 			$arrayRepresentation = $object->toArray();
 			return $this->processCollectionType($arrayRepresentation, array_keys($arrayRepresentation));
-		} elseif ($object instanceof \Netlogix\Crud\Domain\Model\DataTransfer\DataTransferInterface) {
+		} elseif ($object instanceof DataTransferInterface) {
 			if (!$this->cacheTagService) {
 				$content = $this->processCollectionType($object, $object->getPropertyNamesToBeApiExposed());
 			} else {
 				$this->cacheTagService->openEnvironment();
 				$this->cacheTagService->addEnvironmentCacheTag($object);
-				$identifier = md5($this->cacheTagService->createCacheIdentifier(array($this->metaDataProcessorGroup, $object)));
+				$identifier = md5($this->cacheTagService->createCacheIdentifier([$this->metaDataProcessorGroup, $object]));
 
 				if (!$this->cache->has($identifier)) {
 					$content = $this->processCollectionType($object, $object->getPropertyNamesToBeApiExposed());
@@ -216,10 +224,9 @@ class SerializationService {
 				$this->cacheTagService->closeEnvironment();
 			}
 			return $content;
-		} elseif ($object instanceof \Netlogix\Crud\Domain\Model\DataTransfer\UriPointer) {
+		} elseif ($object instanceof UriPointer) {
 			return $this->processUriPointer($object);
 		}
-
 	}
 
 	/**
@@ -260,11 +267,11 @@ class SerializationService {
 	 * @return array
 	 */
 	protected function processCollectionType($collection, $collectionKeys) {
-		$result = array();
+		$result = [];
 		foreach ($collectionKeys as $collectionKey) {
 			array_push($this->propertyPath, $collectionKey);
 
-			$value = \TYPO3\Flow\Reflection\ObjectAccess::getProperty($collection, $collectionKey);
+			$value = ObjectAccess::getProperty($collection, $collectionKey);
 			$result[$collectionKey] = $this->processInternal($value);
 
 			array_pop($this->propertyPath);
@@ -277,10 +284,10 @@ class SerializationService {
 	 *
 	 * FIXME: Introduce a service that handles this uri building.
 	 *
-	 * @param \Netlogix\Crud\Domain\Model\DataTransfer\UriPointer $uriPointer
+	 * @param UriPointer $uriPointer
 	 * @return string
 	 */
-	protected function processUriPointer(\Netlogix\Crud\Domain\Model\DataTransfer\UriPointer $uriPointer) {
+	protected function processUriPointer(UriPointer $uriPointer) {
 
 		$uri = $this->uriBuilder
 			->reset()
@@ -307,12 +314,11 @@ class SerializationService {
 	 * @return array
 	 */
 	protected function getMetaData($propertyPath, $processedValue, $object) {
-		$metaData = array();
+		$metaData = [];
 
 		foreach ($this->metaDataProcessors as $metaDataProcessorKey => $metaDataProcessorConfiguration) {
-
 			if (!isset($this->metaDataProcessorStorage[$metaDataProcessorKey])) {
-				$this->metaDataProcessorStorage[$metaDataProcessorKey] = array();
+				$this->metaDataProcessorStorage[$metaDataProcessorKey] = [];
 			}
 
 			$path = $metaDataProcessorConfiguration['path'];
@@ -322,7 +328,6 @@ class SerializationService {
 				$processor = $metaDataProcessorConfiguration['processor'];
 				$metaData = $processor->process($metaData, $propertyPath, $processedValue, $this->metaDataProcessorStorage[$metaDataProcessorKey], $object, $this->uriBuilder, $this->metaDataProcessorGroup);
 			}
-
 		}
 
 		return $metaData;
@@ -346,13 +351,13 @@ class SerializationService {
 			return $result;
 		}
 
-		$flatResult = \Netlogix\Crud\Utility\ArrayUtility::flatten($result);
-		$additionalMetaData = array();
+		$flatResult = ArrayUtility::flatten($result);
+		$additionalMetaData = [];
 
 		foreach ($flatResult as $propertyPath => $value) {
 			$metaData = $this->getMetaData($propertyPath, $value, $object);
 			if ($metaData) {
-				$additionalMetaData = array_merge($additionalMetaData, \Netlogix\Crud\Utility\ArrayUtility::flatten($metaData, $propertyPath . '#'));
+				$additionalMetaData = array_merge($additionalMetaData, ArrayUtility::flatten($metaData, $propertyPath . '#'));
 			}
 		}
 
@@ -360,7 +365,7 @@ class SerializationService {
 			return $result;
 		} else {
 			$flatResult = array_merge($flatResult, $additionalMetaData);
-			return \Netlogix\Crud\Utility\ArrayUtility::unflatten($flatResult);
+			return ArrayUtility::unflatten($flatResult);
 		}
 
 	}
@@ -375,17 +380,17 @@ class SerializationService {
 
 		// FIXME: YAML configuration
 		$this->metaDataProcessorGroup = $metaDataProcessorGroup;
-		$this->metaDataProcessors = array();
+		$this->metaDataProcessors = [];
 		if (!$metaDataProcessorGroup) {
 			return;
 		}
 
-		$settings = (array) $this->configurationManager->getConfiguration(\TYPO3\Flow\Configuration\ConfigurationManager::CONFIGURATION_TYPE_SETTINGS, 'Netlogix.Crud');
+		$settings = (array)$this->configurationManager->getConfiguration(ConfigurationManager::CONFIGURATION_TYPE_SETTINGS, 'Netlogix.Crud');
 		if (!isset($settings['metaDataProcessorGroups'][$metaDataProcessorGroup])) {
 			return;
 		}
 
-		foreach (\TYPO3\Flow\Utility\Arrays::trimExplode(',', $settings['metaDataProcessorGroups'][$metaDataProcessorGroup]) as $metaDataProcessorIndividual) {
+		foreach (Arrays::trimExplode(',', $settings['metaDataProcessorGroups'][$metaDataProcessorGroup]) as $metaDataProcessorIndividual) {
 			if (!isset($settings['metaDataProcessorIndividuals'][$metaDataProcessorIndividual])) {
 				continue;
 			}
@@ -398,10 +403,10 @@ class SerializationService {
 				// FIXME: Exception
 				continue;
 			}
-			$this->metaDataProcessors[] = array(
+			$this->metaDataProcessors[] = [
 				'path' => $metaDataProcessorIndividual['path'],
 				'processor' => $this->objectManager->get($metaDataProcessorIndividual['processor'])
-			);
+			];
 		}
 	}
 

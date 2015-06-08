@@ -249,7 +249,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 				);
 			}
 		}
-		$result['success'] = false;
+		$result['success'] = FALSE;
 		$this->view->assign('value', $result);
 		$this->response->setStatus(400);
 	}
@@ -267,7 +267,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		$uri = $this->uriBuilder->setCreateAbsoluteUri(TRUE)->uriFor('index', array($this->resourceArgumentName => $payload), NULL, NULL, NULL);
 
 		$this->response->setStatus($statusCode);
-		$this->response->setHeader('Location', (string) $uri);
+		$this->response->setHeader('Location', (string)$uri);
 
 		$this->view->assign('value', $this->dataTransferObjectFactory->getDataTransferObject($payload));
 		$this->response->setContent($this->view->render());

@@ -13,13 +13,16 @@ namespace Netlogix\Crud\Property\TypeConverter;
  *                                                                        */
 
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Property\PropertyMappingConfigurationInterface;
+use TYPO3\Flow\Property\TypeConverter\ObjectConverter;
+use TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter;
 
 /**
  * @package Netlogix.Crud
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  * @Flow\Scope("singleton")
  */
-class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\ObjectConverter {
+class DataTransferObjectConverter extends ObjectConverter {
 
 	/**
 	 * @var \TYPO3\Flow\Property\PropertyMapper
@@ -27,10 +30,19 @@ class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\Obj
 	 */
 	protected $propertyMapper;
 
-	protected $sourceTypes = array('string', 'array');
+	/**
+	 * @var array
+	 */
+	protected $sourceTypes = ['string', 'array'];
 
+	/**
+	 * @var string
+	 */
 	protected $targetType = 'Netlogix\\Crud\\Domain\\Model\\DataTransfer\\AbstractDataTransferObject';
 
+	/**
+	 * @var int
+	 */
 	protected $priority = 5;
 
 	/**
@@ -47,12 +59,12 @@ class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\Obj
 	 * @param mixed $source
 	 * @param string $targetType
 	 * @param array $convertedChildProperties
-	 * @param \TYPO3\Flow\Property\PropertyMappingConfigurationInterface $configuration
+	 * @param PropertyMappingConfigurationInterface $configuration
 	 * @return object the target type
 	 * @throws \TYPO3\Flow\Property\Exception\InvalidTargetException
 	 * @throws \InvalidArgumentException
 	 */
-	public function convertFrom($source, $targetType, array $convertedChildProperties = array(), \TYPO3\Flow\Property\PropertyMappingConfigurationInterface $configuration = NULL) {
+	public function convertFrom($source, $targetType, array $convertedChildProperties = [], PropertyMappingConfigurationInterface $configuration = NULL) {
 		if ($source === '') {
 			/*
 			 * Nothing to convert.
@@ -60,29 +72,28 @@ class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\Obj
 			return NULL;
 
 		} elseif (!is_array($source) || isset($source['__identity'])) {
-
 			/*
 			 * This situation usually indicates that RealURL covers the payload param.
 			 * Just add the payload directly to TypoLink and let this ObjectConverter
 			 * handle the wrapping.
 			 */
 			if (is_array($source)) {
-				$source['payload'] = array(
+				$source['payload'] = [
 					'__identity' => $source['__identity'],
-				);
+				];
 				unset($source['__identity']);
 
 			} else {
-				$source = array(
-					'payload' => array(
+				$source = [
+					'payload' => [
 						'__identity' => $source,
-					),
-				);
+					],
+				];
 
 			}
 			/** @var \TYPO3\Flow\Mvc\Controller\MvcPropertyMappingConfiguration $configuration */
 			$configuration->allowProperties('payload');
-			$configuration->setTypeConverterOption('TYPO3\\Flow\\Property\\TypeConverter\\PersistentObjectConverter', \TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
+			$configuration->setTypeConverterOption('TYPO3\\Flow\\Property\\TypeConverter\\PersistentObjectConverter', PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
 			return $this->propertyMapper->convert($source, $targetType, $configuration);
 
 		} else {
@@ -93,9 +104,9 @@ class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\Obj
 			 * methods.
 			 */
 			if (!isset($source['payload'])) {
-				$source['payload'] = array(
+				$source['payload'] = [
 					'resource' => '',
-				);
+				];
 			}
 			return parent::convertFrom($source, $targetType, $convertedChildProperties, $configuration);
 
@@ -108,7 +119,7 @@ class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\Obj
 	 * @return bool
 	 */
 	public function canConvertFrom($source, $targetType) {
-		return true;
+		return TRUE;
 	}
 
 	/**
@@ -119,18 +130,18 @@ class DataTransferObjectConverter extends \TYPO3\Flow\Property\TypeConverter\Obj
 	 */
 	public function getSourceChildPropertiesToBeConverted($source) {
 		if (is_string($source)) {
-			$source = array(
-				'payload' => array(
+			$source = [
+				'payload' => [
 					'__identity' => $source,
-				)
-			);
+				]
+			];
 		} elseif (isset($source['__identity'])) {
-			$source['payload'] = array(
+			$source['payload'] = [
 				'__identity' => $source['__identity'],
-			);
+			];
 			unset($source['__identity']);
 		} elseif (!isset($source['payload'])) {
-			$source['payload'] = array();
+			$source['payload'] = [];
 		}
 		$source = parent::getSourceChildPropertiesToBeConverted($source);
 		return $source;

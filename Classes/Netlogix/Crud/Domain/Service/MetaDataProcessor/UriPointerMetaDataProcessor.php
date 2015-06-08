@@ -13,6 +13,11 @@ namespace Netlogix\Crud\Domain\Service\MetaDataProcessor;
  *                                                                        */
 
 use TYPO3\Flow\Annotations as Flow;
+use TYPO3\Flow\Http\Client\Browser;
+use TYPO3\Flow\Http\Client\CurlEngine;
+use TYPO3\Flow\Http\Request;
+use TYPO3\Flow\Http\Uri;
+use TYPO3\Flow\Mvc\Routing\UriBuilder;
 
 /**
  * Enhances Json output by some meta data
@@ -21,16 +26,16 @@ use TYPO3\Flow\Annotations as Flow;
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  *
  */
-class UriPointerMetaDataProcessor extends \Netlogix\Crud\Domain\Service\MetaDataProcessor\AbstractMetaDataProcessor {
+class UriPointerMetaDataProcessor extends AbstractMetaDataProcessor {
 
 	/**
-	 * @var \TYPO3\Flow\Http\Client\Browser
+	 * @var Browser
 	 * @Flow\Inject
 	 */
 	protected $browser;
 
 	/**
-	 * @var \TYPO3\Flow\Http\Client\CurlEngine
+	 * @var CurlEngine
 	 * @Flow\Inject
 	 */
 	protected $browserRequestEngine;
@@ -50,9 +55,9 @@ class UriPointerMetaDataProcessor extends \Netlogix\Crud\Domain\Service\MetaData
 	 * @param array $metaData
 	 * @param string $propertyPath
 	 * @param mixed $processedValue
-	 * @param array $upstreamStorage
+	 * @param array $alreadyIncluded
 	 * @param mixed $object
-	 * @param \TYPO3\Flow\Mvc\Routing\UriBuilder $uriBuilder
+	 * @param UriBuilder $uriBuilder
 	 * @param string $metaDataProcessorGroup
 	 * @return array
 	 */
@@ -63,9 +68,9 @@ class UriPointerMetaDataProcessor extends \Netlogix\Crud\Domain\Service\MetaData
 
 		$this->browser->setRequestEngine($this->browserRequestEngine);
 
-		$uri = new \TYPO3\Flow\Http\Uri($processedValue);
+		$uri = new Uri($processedValue);
 
-		$request = \TYPO3\Flow\Http\Request::create($uri);
+		$request = Request::create($uri);
 		$request->getUri()->setUsername($uri->getUsername());
 		$request->getUri()->setPassword($uri->getPassword());
 		$request->setHeader('Accept', 'application/json, text/plain, */*');
@@ -73,7 +78,6 @@ class UriPointerMetaDataProcessor extends \Netlogix\Crud\Domain\Service\MetaData
 		$response = $this->browser->sendRequest($request);
 
 		if ($response->getStatusCode() === 200) {
-
 			$content = json_decode((string)$response, TRUE);
 
 			/*
@@ -89,7 +93,6 @@ class UriPointerMetaDataProcessor extends \Netlogix\Crud\Domain\Service\MetaData
 					unset($metaData['content']);
 				}
 			}
-
 		}
 
 		$alreadyIncluded[] = $processedValue;

@@ -59,8 +59,9 @@ class UriPointer {
 
 	/**
 	 * @param array $properties
+	 * @throws \Exception
 	 */
-	public function __construct(array $properties = array()) {
+	public function __construct(array $properties = []) {
 		foreach ($properties as $propertyName => $propertyValue) {
 			if (property_exists(get_class($this), $propertyName)) {
 				$this->$propertyName = $propertyValue;
