@@ -38,6 +38,12 @@ abstract class AbstractDataTransferObject implements DataTransferInterface {
 	protected $configurationManager;
 
 	/**
+	 * @var \Netlogix\Crud\Domain\Service\DataTransferObjectFactory
+	 * @Flow\Inject
+	 */
+	protected $dataTransferObjectFactory;
+
+	/**
 	 * @ORM\Column(type="string", nullable=TRUE)
 	 */
 	protected $payload;
