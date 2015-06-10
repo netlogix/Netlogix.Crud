@@ -46,10 +46,20 @@ class DataTransferObjectFactory {
 	/**
 	 * @var array
 	 */
+	protected $classMappingConfigurationStack = [];
+
+	/**
+	 * @var array
+	 */
 	protected $classNameToDtoClassNameReplaceFragments = [
 		'\\Domain\\Model\\DataTransfer\\' => '\\Domain\\Model\\',
 		'\\Domain\\Model\\Dto\\' => '\\Domain\\Model\\',
 	];
+
+	/**
+	 * @var array
+	 */
+	protected $classNameToDtoClassNameReplaceFragmentsStack = array();
 
 	/**
 	 * Returns TRUE if there is a DataTransferObject class for the given
@@ -73,7 +83,7 @@ class DataTransferObjectFactory {
 		$objectName = TypeHandling::getTypeForValue($object);
 
 		if (!array_key_exists($objectName, $this->classMappingConfiguration)) {
-			foreach ($this->classNameToDtoClassNameReplaceFragments as $dtoClassNameFragment => $classNameFragment) {
+			foreach (array_reverse($this->classNameToDtoClassNameReplaceFragments, TRUE) as $dtoClassNameFragment => $classNameFragment) {
 				$dtoClassName = str_replace($classNameFragment, $dtoClassNameFragment, $objectName);
 				if (class_exists($dtoClassName)) {
 					$this->classMappingConfiguration[$objectName] = $dtoClassName;
@@ -111,6 +121,29 @@ class DataTransferObjectFactory {
 			$result[$key] = $this->getDataTransferObject($object);
 		}
 		return $result;
+	}
+
+	/**
+	 * Register new class name fragments
+	 *
+	 * @param array $classNameToDtoClassNameReplaceFragments
+	 * @param bool $mergeWithExistingFragments
+	 */
+	public function pushClassNameToDtoClassNameReplaceFragments(array $classNameToDtoClassNameReplaceFragments, $mergeWithExistingFragments = TRUE) {
+		array_push($this->classNameToDtoClassNameReplaceFragmentsStack, $this->classNameToDtoClassNameReplaceFragments);
+		array_push($this->classMappingConfigurationStack, $this->classMappingConfiguration);
+		$this->classNameToDtoClassNameReplaceFragments = \Netlogix\Crud\Utility\ArrayUtility::arrayMergeRecursiveOverrule(
+			$mergeWithExistingFragments ? $this->classNameToDtoClassNameReplaceFragments : array(),
+			$classNameToDtoClassNameReplaceFragments
+		);
+	}
+
+	/**
+	 * Restore old class name fragment settings
+	 */
+	public function popClassNameToDtoClassNameReplaceFragments() {
+		$this->classMappingConfiguration = array_pop($this->classMappingConfigurationStack);
+		$this->classNameToDtoClassNameReplaceFragments = array_pop($this->classNameToDtoClassNameReplaceFragmentsStack);
 	}
 
 }
