@@ -64,6 +64,12 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	protected $dataTransferObjectFactory;
 
 	/**
+	 * @Flow\Inject
+	 * @var \TYPO3\Flow\I18n\Translator
+	 */
+	protected $translator;
+
+	/**
 	 * Determines the action method and assures that the method exists.
 	 *
 	 * @return string The action method name
@@ -225,6 +231,10 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		$configuration->setTypeConverterOption(PersistentObjectConverter::class, PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
 	}
 
+	/**
+	 * @param string $argumentName
+	 * @return bool
+	 */
 	protected function isActionMethodArgumentDto($argumentName) {
 		$actionMethodParameters = static::getActionMethodParameters($this->objectManager);
 		if (isset($actionMethodParameters[$this->actionMethodName])) {
@@ -236,6 +246,9 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		return isset($methodParameters[$argumentName]) ? is_a($methodParameters[$argumentName]['type'], AbstractDataTransferObject::class, TRUE) : FALSE;
 	}
 
+	/**
+	 * Return validation results as json
+	 */
 	public function errorAction() {
 		$validationResults = $this->arguments->getValidationResults()->getFlattenedErrors();
 		$result = array();
@@ -243,9 +256,22 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 		foreach ($validationResults as $key => $validationResult) {
 			/** @var \TYPO3\Flow\Validation\Error $error */
 			foreach ($validationResult as $error) {
+				// Check Current Package Validation Errors
+				$translatedMessage = $this->translator->translateById($error->getCode(), $error->getArguments(), NULL, NULL, 'ValidationErrors', $this->request->getControllerPackageKey());
+
+				// Check Flow Validation Errors
+				if ($translatedMessage === $error->getCode()) {
+					$translatedMessage = $this->translator->translateById($error->getCode(), $error->getArguments(), NULL, NULL, 'ValidationErrors', 'TYPO3.Flow');
+				}
+
+				// Use default error message
+				if ($translatedMessage === $error->getCode()) {
+					$translatedMessage = $error->render();
+				}
+
 				$result['errors'][$key][] = array(
 					'code' => $error->getCode(),
-					'message' => $error->getMessage()
+					'message' => $translatedMessage
 				);
 			}
 		}
