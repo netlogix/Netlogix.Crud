@@ -106,6 +106,9 @@ class DataTransferObjectFactory {
 	 * @return \Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject
 	 */
 	public function getDataTransferObject($object) {
+		if ($object === NULL) {
+			return NULL;
+		}
 		$identifier = $this->persistenceManager->getIdentifierByObject($object);
 		$dto = $this->propertyMapper->convert($identifier, $this->getDataTransferObjectName($object));
 		return $dto;
