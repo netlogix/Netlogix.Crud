@@ -21,6 +21,7 @@ use TYPO3\Flow\Configuration\ConfigurationManager;
 use TYPO3\Flow\Mvc\Routing\UriBuilder;
 use TYPO3\Flow\Property\TypeConverter\DateTimeConverter;
 use TYPO3\Flow\Reflection\ObjectAccess;
+use TYPO3\Flow\Resource\Resource;
 use TYPO3\Flow\Utility\Arrays;
 
 /**
@@ -66,6 +67,12 @@ class SerializationService {
 	 * @Flow\Inject
 	 */
 	protected $objectManager;
+
+	/**
+	 * @var \TYPO3\Flow\Resource\ResourceManager
+	 * @Flow\Inject
+	 */
+	protected $resourceManager;
 
 	/**
 	 * @ var \TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
@@ -226,6 +233,8 @@ class SerializationService {
 			return $content;
 		} elseif ($object instanceof UriPointer) {
 			return $this->processUriPointer($object);
+		} elseif ($object instanceof Resource) {
+			return $this->resourceManager->getPublicPersistentResourceUri($object);
 		}
 	}
 
