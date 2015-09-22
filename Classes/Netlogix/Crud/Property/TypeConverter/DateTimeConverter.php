@@ -30,6 +30,8 @@ class DateTimeConverter extends \TYPO3\Flow\Property\TypeConverter\DateTimeConve
 		if ($date instanceof \TYPO3\Flow\Validation\Error && is_string($source)) {
 			$newDate = new $targetType($source);
 			if ($newDate !== FALSE) {
+				$timeZone = (new $targetType)->getTimezone();
+				$newDate->setTimezone($timeZone);
 				$date = $newDate;
 			}
 		}
