@@ -14,13 +14,13 @@ namespace Netlogix\Crud\Controller;
 
 use Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject;
 use Netlogix\Crud\View\JsonView;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Mvc\Exception\StopActionException;
-use TYPO3\Flow\Property\PropertyMapper;
-use TYPO3\Flow\Property\PropertyMappingConfiguration;
-use TYPO3\Flow\Property\TypeConverter\MediaTypeConverterInterface;
-use TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter;
-use TYPO3\Fluid\View\TemplateView;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Mvc\Exception\StopActionException;
+use Neos\Flow\Property\PropertyMapper;
+use Neos\Flow\Property\PropertyMappingConfiguration;
+use Neos\Flow\Property\TypeConverter\MediaTypeConverterInterface;
+use Neos\Flow\Property\TypeConverter\PersistentObjectConverter;
+use Neos\FluidAdaptor\View\TemplateView;
 
 /**
  * An action controller for RESTful web services
@@ -28,7 +28,7 @@ use TYPO3\Fluid\View\TemplateView;
  * @package Netlogix.Crud
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
+class RestController extends \Neos\Flow\Mvc\Controller\RestController {
 
 	/**
 	 * The default view object to use if none of the resolved views can render
@@ -65,7 +65,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 
 	/**
 	 * @Flow\Inject
-	 * @var \TYPO3\Flow\I18n\Translator
+	 * @var \Neos\Flow\I18n\Translator
 	 */
 	protected $translator;
 
@@ -73,7 +73,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * Determines the action method and assures that the method exists.
 	 *
 	 * @return string The action method name
-	 * @throws \TYPO3\Flow\Mvc\Exception\NoSuchActionException if the action specified in the request object does not exist (and if there's no default action either).
+	 * @throws \Neos\Flow\Mvc\Exception\NoSuchActionException if the action specified in the request object does not exist (and if there's no default action either).
 	 */
 	protected function resolveActionMethodName() {
 		$this->request->__previousControllerActionName = $this->request->getControllerActionName();
@@ -87,7 +87,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * Don't override this method - use initializeAction() instead.
 	 *
 	 * @return void
-	 * @throws \TYPO3\Flow\Mvc\Exception\InvalidArgumentTypeException
+	 * @throws \Neos\Flow\Mvc\Exception\InvalidArgumentTypeException
 	 * @see initializeArguments()
 	 */
 	public function initializeActionMethodArguments() {
@@ -117,7 +117,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 
 	/**
 	 * @return array
-	 * @throws \TYPO3\Flow\Http\Exception
+	 * @throws \Neos\Flow\Http\Exception
 	 */
 	protected function parseRequestBody() {
 		$propertyMappingConfiguration = new PropertyMappingConfiguration();
@@ -194,7 +194,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 */
 	protected function initializePropertyMappingConfigurationForShowActions() {
 
-		/** @var \TYPO3\Flow\Mvc\Controller\Argument $argument */
+		/** @var \Neos\Flow\Mvc\Controller\Argument $argument */
 		$argument = $this->arguments[$this->resourceArgumentName];
 
 		$configuration = $argument->getPropertyMappingConfiguration();
@@ -206,7 +206,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 */
 	protected function initializePropertyMappingConfigurationForUpdateActions() {
 
-		/** @var \TYPO3\Flow\Mvc\Controller\Argument $argument */
+		/** @var \Neos\Flow\Mvc\Controller\Argument $argument */
 		$argument = $this->arguments[$this->resourceArgumentName];
 
 		$configuration = $argument->getPropertyMappingConfiguration();
@@ -224,7 +224,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	protected function initializePropertyMappingConfigurationForCreateActions() {
 		$this->initializePropertyMappingConfigurationForUpdateActions();
 
-		/** @var \TYPO3\Flow\Mvc\Controller\Argument $argument */
+		/** @var \Neos\Flow\Mvc\Controller\Argument $argument */
 		$argument = $this->arguments[$this->resourceArgumentName];
 
 		$configuration = $argument->getPropertyMappingConfiguration()->forProperty('payload');
@@ -252,16 +252,16 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	public function errorAction() {
 		$validationResults = $this->arguments->getValidationResults()->getFlattenedErrors();
 		$result = array();
-		/** @var \TYPO3\Flow\Error\Error  $validationResult */
+		/** @var \Neos\Error\Messages\Error  $validationResult */
 		foreach ($validationResults as $key => $validationResult) {
-			/** @var \TYPO3\Flow\Validation\Error $error */
+			/** @var \Neos\Flow\Validation\Error $error */
 			foreach ($validationResult as $error) {
 				// Check Current Package Validation Errors
 				$translatedMessage = $this->translator->translateById($error->getCode(), $error->getArguments(), NULL, NULL, 'ValidationErrors', $this->request->getControllerPackageKey());
 
 				// Check Flow Validation Errors
 				if ($translatedMessage === $error->getCode()) {
-					$translatedMessage = $this->translator->translateById($error->getCode(), $error->getArguments(), NULL, NULL, 'ValidationErrors', 'TYPO3.Flow');
+					$translatedMessage = $this->translator->translateById($error->getCode(), $error->getArguments(), NULL, NULL, 'ValidationErrors', 'Neos.Flow');
 				}
 
 				// Use default error message
@@ -284,7 +284,7 @@ class RestController extends \TYPO3\Flow\Mvc\Controller\RestController {
 	 * @param object $payload
 	 * @param integer $statusCode
 	 * @throws StopActionException
-	 * @throws \TYPO3\Flow\Mvc\Routing\Exception\MissingActionNameException
+	 * @throws \Neos\Flow\Mvc\Routing\Exception\MissingActionNameException
 	 */
 	protected function reportSuccess($payload, $statusCode = 200) {
 		$this->uriBuilder->reset();

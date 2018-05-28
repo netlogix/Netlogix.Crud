@@ -12,10 +12,11 @@ namespace Netlogix\Crud\Property\TypeConverter;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Property\PropertyMappingConfigurationInterface;
-use TYPO3\Flow\Property\TypeConverter\ObjectConverter;
-use TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Property\PropertyMappingConfigurationInterface;
+use Neos\Flow\Property\TypeConverter\ObjectConverter;
+use Neos\Flow\Property\TypeConverter\PersistentObjectConverter;
+use Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject;
 
 /**
  * @package Netlogix.Crud
@@ -25,7 +26,7 @@ use TYPO3\Flow\Property\TypeConverter\PersistentObjectConverter;
 class DataTransferObjectConverter extends ObjectConverter {
 
 	/**
-	 * @var \TYPO3\Flow\Property\PropertyMapper
+	 * @var \Neos\Flow\Property\PropertyMapper
 	 * @Flow\Inject
 	 */
 	protected $propertyMapper;
@@ -38,7 +39,7 @@ class DataTransferObjectConverter extends ObjectConverter {
 	/**
 	 * @var string
 	 */
-	protected $targetType = 'Netlogix\\Crud\\Domain\\Model\\DataTransfer\\AbstractDataTransferObject';
+	protected $targetType = AbstractDataTransferObject::class;
 
 	/**
 	 * @var int
@@ -53,7 +54,7 @@ class DataTransferObjectConverter extends ObjectConverter {
 	 * - an arbitrary object, or a simple type (which has been created while mapping).
 	 *   This is the normal case.
 	 * - NULL, indicating that this object should *not* be mapped (i.e. a "File Upload" Converter could return NULL if no file has been uploaded, and a silent failure should occur.
-	 * - An instance of \TYPO3\Flow\Error\Error -- This will be a user-visible error message later on.
+	 * - An instance of \Neos\Error\Messages\Error -- This will be a user-visible error message later on.
 	 * Furthermore, it should throw an Exception if an unexpected failure (like a security error) occurred or a configuration issue happened.
 	 *
 	 * @param mixed $source
@@ -61,7 +62,7 @@ class DataTransferObjectConverter extends ObjectConverter {
 	 * @param array $convertedChildProperties
 	 * @param PropertyMappingConfigurationInterface $configuration
 	 * @return object the target type
-	 * @throws \TYPO3\Flow\Property\Exception\InvalidTargetException
+	 * @throws \Neos\Flow\Property\Exception\InvalidTargetException
 	 * @throws \InvalidArgumentException
 	 */
 	public function convertFrom($source, $targetType, array $convertedChildProperties = [], PropertyMappingConfigurationInterface $configuration = NULL) {
@@ -91,9 +92,9 @@ class DataTransferObjectConverter extends ObjectConverter {
 				];
 
 			}
-			/** @var \TYPO3\Flow\Mvc\Controller\MvcPropertyMappingConfiguration $configuration */
+			/** @var \Neos\Flow\Mvc\Controller\MvcPropertyMappingConfiguration $configuration */
 			$configuration->allowProperties('payload');
-			$configuration->setTypeConverterOption('TYPO3\\Flow\\Property\\TypeConverter\\PersistentObjectConverter', PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
+			$configuration->setTypeConverterOption(PersistentObjectConverter::class, PersistentObjectConverter::CONFIGURATION_CREATION_ALLOWED, TRUE);
 			return $this->propertyMapper->convert($source, $targetType, $configuration);
 
 		} else {

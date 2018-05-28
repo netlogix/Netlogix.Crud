@@ -12,7 +12,7 @@ namespace Netlogix\Crud\Domain\Model\DataTransfer;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
+use Neos\Flow\Annotations as Flow;
 
 /**
  * Each DataTransfer Object object should implement this interface. It informs the JsonView about

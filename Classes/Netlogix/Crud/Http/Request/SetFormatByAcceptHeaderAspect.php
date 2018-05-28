@@ -12,8 +12,8 @@ namespace Netlogix\Crud\Http\Request;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Aop\JoinPointInterface;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Aop\JoinPointInterface;
 
 /**
  * Sets the request format based on the HTTP "accept" header.
@@ -28,14 +28,14 @@ class SetFormatByAcceptHeaderAspect {
 	/**
 	 * Around advice
 	 *
-	 * @Flow\Around("method(TYPO3\Flow\Mvc\ActionRequest->setArguments())")
-	 * @param \TYPO3\Flow\Aop\JoinPointInterface $joinPoint The current join point
+	 * @Flow\Around("method(Neos\Flow\Mvc\ActionRequest->setArguments())")
+	 * @param \Neos\Flow\Aop\JoinPointInterface $joinPoint The current join point
 	 * @return array Result of the target method
 	 */
 	public function setRequestFormatByAcceptHeader(JoinPointInterface $joinPoint) {
 
 		$joinPoint->getAdviceChain()->proceed($joinPoint);
-		/** @var \TYPO3\Flow\Mvc\ActionRequest $actionRequest */
+		/** @var \Neos\Flow\Mvc\ActionRequest $actionRequest */
 		$actionRequest = $joinPoint->getProxy();
 		if ($actionRequest->getFormat() === NULL) {
 			foreach (array('Accept', 'Http-Accept') as $acceptFieldNameOptions) {

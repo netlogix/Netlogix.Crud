@@ -13,16 +13,17 @@ namespace Netlogix\Crud\Domain\Service;
  *                                                                        */
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Neos\Cache\Frontend\FrontendInterface;
 use Netlogix\Crud\Domain\Model\DataTransfer\DataTransferInterface;
 use Netlogix\Crud\Domain\Model\DataTransfer\UriPointer;
 use Netlogix\Crud\Utility\ArrayUtility;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Configuration\ConfigurationManager;
-use TYPO3\Flow\Mvc\Routing\UriBuilder;
-use TYPO3\Flow\Property\TypeConverter\DateTimeConverter;
-use TYPO3\Flow\Reflection\ObjectAccess;
-use TYPO3\Flow\Resource\Resource;
-use TYPO3\Flow\Utility\Arrays;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Configuration\ConfigurationManager;
+use Neos\Flow\Mvc\Routing\UriBuilder;
+use Neos\Flow\Property\TypeConverter\DateTimeConverter;
+use Neos\Utility\ObjectAccess;
+use Neos\Flow\ResourceManagement\PersistentResource;
+use Neos\Utility\Arrays;
 
 /**
  * Transforms serializable targets to arrays that can be handled by json_serialize().
@@ -63,19 +64,19 @@ class SerializationService {
 	protected $configurationManager;
 
 	/**
-	 * @var \TYPO3\Flow\Object\ObjectManagerInterface
+	 * @var \Neos\Flow\ObjectManagement\ObjectManagerInterface
 	 * @Flow\Inject
 	 */
 	protected $objectManager;
 
 	/**
-	 * @var \TYPO3\Flow\Resource\ResourceManager
+	 * @var \Neos\Flow\ResourceManagement\ResourceManager
 	 * @Flow\Inject
 	 */
 	protected $resourceManager;
 
 	/**
-	 * @ var \TYPO3\CMS\Core\Cache\Frontend\FrontendInterface
+	 * @var FrontendInterface
 	 */
 	protected $cache;
 

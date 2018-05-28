@@ -12,9 +12,9 @@ namespace Netlogix\Crud\Domain\Service;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Property\Exception\InvalidTargetException;
-use TYPO3\Flow\Utility\TypeHandling;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Property\Exception\InvalidTargetException;
+use Neos\Utility\TypeHandling;
 
 /**
  * Gets DTOs from given Non-DTOs.
@@ -27,13 +27,13 @@ use TYPO3\Flow\Utility\TypeHandling;
 class DataTransferObjectFactory {
 
 	/**
-	 * @var \TYPO3\Flow\Persistence\PersistenceManagerInterface
+	 * @var \Neos\Flow\Persistence\PersistenceManagerInterface
 	 * @Flow\Inject
 	 */
 	protected $persistenceManager;
 
 	/**
-	 * @var \TYPO3\Flow\Property\PropertyMapper
+	 * @var \Neos\Flow\Property\PropertyMapper
 	 * @Flow\Inject
 	 */
 	protected $propertyMapper;

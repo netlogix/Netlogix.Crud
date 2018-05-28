@@ -12,7 +12,7 @@ namespace Netlogix\Crud\Domain\Model\DataTransfer;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
+use Neos\Flow\Annotations as Flow;
 
 /**
  * An UriPointer is used to postpone UriBuilder->for() calls. It contains all necessary
