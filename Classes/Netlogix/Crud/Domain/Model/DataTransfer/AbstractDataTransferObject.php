@@ -13,26 +13,26 @@ namespace Netlogix\Crud\Domain\Model\DataTransfer;
  *                                                                        */
 
 use Doctrine\ORM\Mapping as ORM;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Core\Bootstrap;
-use TYPO3\Flow\Http\Request;
-use TYPO3\Flow\Mvc\ActionRequest;
-use TYPO3\Flow\Mvc\Routing\UriBuilder;
-use TYPO3\Flow\Persistence\PersistenceManagerInterface;
-use TYPO3\Flow\Property\Exception;
-use TYPO3\Flow\Reflection\Exception\PropertyNotAccessibleException;
-use TYPO3\Flow\Reflection\ObjectAccess;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Core\Bootstrap;
+use Neos\Flow\Http\Request;
+use Neos\Flow\Mvc\ActionRequest;
+use Neos\Flow\Mvc\Routing\UriBuilder;
+use Neos\Flow\Persistence\PersistenceManagerInterface;
+use Neos\Flow\Property\Exception;
+use Neos\Utility\Exception\PropertyNotAccessibleException;
+use Neos\Utility\ObjectAccess;
 
 abstract class AbstractDataTransferObject implements DataTransferInterface {
 
 	/**
-	 * @var \TYPO3\Flow\Object\ObjectManagerInterface
+	 * @var \Neos\Flow\ObjectManagement\ObjectManagerInterface
 	 * @Flow\Inject
 	 */
 	protected $objectManager;
 
 	/**
-	 * @var \TYPO3\Flow\Configuration\ConfigurationManager
+	 * @var \Neos\Flow\Configuration\ConfigurationManager
 	 * @Flow\Inject
 	 */
 	protected $configurationManager;
@@ -97,7 +97,7 @@ abstract class AbstractDataTransferObject implements DataTransferInterface {
 		if ($originalValue instanceof UriPointer) {
 			/*
 			 * UriPointer objects need to be transformed into the actual URI. Since this relies on
-			 * an UriBuilder being bound to a \TYPO3\Flow\Http\Request object, this is no
+			 * an UriBuilder being bound to a \Neos\Flow\Http\Request object, this is no
 			 * simple task at all without having a proper controller context.
 			 * Only for the purpose of validation and change tracking we do this. Every other use
 			 * case for UriPointer objects should make use of the surrounding controllers UriBuilder.
@@ -118,7 +118,7 @@ abstract class AbstractDataTransferObject implements DataTransferInterface {
 
 		static $uriBuilder;
 		if (!$uriBuilder) {
-			/** @var \TYPO3\Flow\Object\ObjectManagerInterface $objectManager */
+			/** @var \Neos\Flow\ObjectManagement\ObjectManagerInterface $objectManager */
 			$objectManager = Bootstrap::$staticObjectManager;
 
 			/** @var ActionRequest $request */

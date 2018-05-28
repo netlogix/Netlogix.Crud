@@ -12,12 +12,12 @@ namespace Netlogix\Crud\Domain\Service\MetaDataProcessor;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Http\Client\Browser;
-use TYPO3\Flow\Http\Client\CurlEngine;
-use TYPO3\Flow\Http\Request;
-use TYPO3\Flow\Http\Uri;
-use TYPO3\Flow\Mvc\Routing\UriBuilder;
+use Neos\Flow\Annotations as Flow;
+use Neos\Flow\Http\Client\Browser;
+use Neos\Flow\Http\Client\CurlEngine;
+use Neos\Flow\Http\Request;
+use Neos\Flow\Http\Uri;
+use Neos\Flow\Mvc\Routing\UriBuilder;
 
 /**
  * Enhances Json output by some meta data

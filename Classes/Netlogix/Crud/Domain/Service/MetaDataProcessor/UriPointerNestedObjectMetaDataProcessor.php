@@ -15,8 +15,8 @@ namespace Netlogix\Crud\Domain\Service\MetaDataProcessor;
 use Netlogix\Crud\Domain\Model\DataTransfer\AbstractDataTransferObject;
 use Netlogix\Crud\Domain\Model\DataTransfer\UriPointer;
 use Netlogix\Crud\Domain\Service\MetaDataProcessor\AbstractMetaDataProcessor;
-use TYPO3\Flow\Annotations as Flow;
-use TYPO3\Flow\Reflection\ObjectAccess;
+use Neos\Flow\Annotations as Flow;
+use Neos\Utility\ObjectAccess;
 
 /**
  * Enhances Json output by some meta data
@@ -28,13 +28,13 @@ use TYPO3\Flow\Reflection\ObjectAccess;
 class UriPointerNestedObjectMetaDataProcessor extends AbstractMetaDataProcessor {
 
 	/**
-	 * @var \TYPO3\Flow\Http\Client\Browser
+	 * @var \Neos\Flow\Http\Client\Browser
 	 * @Flow\Inject
 	 */
 	protected $browser;
 
 	/**
-	 * @var \TYPO3\Flow\Http\Client\CurlEngine
+	 * @var \Neos\Flow\Http\Client\CurlEngine
 	 * @Flow\Inject
 	 */
 	protected $browserRequestEngine;
@@ -63,7 +63,7 @@ class UriPointerNestedObjectMetaDataProcessor extends AbstractMetaDataProcessor 
 	 * @param mixed $processedValue
 	 * @param array $alreadyIncluded
 	 * @param mixed $object
-	 * @param \TYPO3\Flow\Mvc\Routing\UriBuilder $uriBuilder
+	 * @param \Neos\Flow\Mvc\Routing\UriBuilder $uriBuilder
 	 * @param string $metaDataProcessorGroup
 	 * @return array
 	 */

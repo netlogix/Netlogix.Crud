@@ -1,12 +1,12 @@
 <?php
 namespace Netlogix\Crud\Property\TypeConverter;
 
-use TYPO3\Flow\Annotations as Flow;
+use Neos\Flow\Annotations as Flow;
 
 /**
  * @Flow\Scope("singleton")
  */
-class DateTimeConverter extends \TYPO3\Flow\Property\TypeConverter\DateTimeConverter {
+class DateTimeConverter extends \Neos\Flow\Property\TypeConverter\DateTimeConverter {
 
 	/**
 	 * @var integer
@@ -19,15 +19,15 @@ class DateTimeConverter extends \TYPO3\Flow\Property\TypeConverter\DateTimeConve
 	 * @param string|integer|array $source the string to be converted to a \DateTime object
 	 * @param string $targetType must be "DateTime"
 	 * @param array $convertedChildProperties not used currently
-	 * @param \TYPO3\Flow\Property\PropertyMappingConfigurationInterface $configuration
+	 * @param \Neos\Flow\Property\PropertyMappingConfigurationInterface $configuration
 	 * @return \DateTime
-	 * @throws \TYPO3\Flow\Validation\Error
+	 * @throws \Neos\Flow\Validation\Error
 	 * @throws \Exception
-	 * @throws \TYPO3\Flow\Property\Exception\TypeConverterException
+	 * @throws \Neos\Flow\Property\Exception\TypeConverterException
 	 */
-	public function convertFrom($source, $targetType, array $convertedChildProperties = [], \TYPO3\Flow\Property\PropertyMappingConfigurationInterface $configuration = NULL) {
+	public function convertFrom($source, $targetType, array $convertedChildProperties = [], \Neos\Flow\Property\PropertyMappingConfigurationInterface $configuration = NULL) {
 		$date = parent::convertFrom($source, $targetType, $convertedChildProperties, $configuration);
-		if ($date instanceof \TYPO3\Flow\Validation\Error && is_string($source)) {
+		if ($date instanceof \Neos\Flow\Validation\Error && is_string($source)) {
 			$newDate = new $targetType($source);
 			if ($newDate !== FALSE) {
 				$timeZone = (new $targetType)->getTimezone();

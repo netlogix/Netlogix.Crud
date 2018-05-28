@@ -12,7 +12,7 @@ namespace Netlogix\Crud\Utility;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
+use Neos\Flow\Annotations as Flow;
 
 /**
  * Additional array utility
@@ -21,7 +21,7 @@ use TYPO3\Flow\Annotations as Flow;
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  * @Flow\Scope("singleton")
  */
-class ArrayUtility extends \TYPO3\Flow\Utility\Arrays {
+class ArrayUtility extends \Neos\Utility\Arrays {
 
 	const SEGMENTATION_CHARACTER = '.';
 

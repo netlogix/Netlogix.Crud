@@ -12,7 +12,7 @@ namespace Netlogix\Crud\Domain\Service\MetaDataProcessor;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
+use Neos\Flow\Annotations as Flow;
 
 /**
  * Enhances Json output by some meta data
@@ -34,7 +34,7 @@ abstract class AbstractMetaDataProcessor {
 	 * @param mixed $processedValue
 	 * @param array $alreadyIncluded
 	 * @param mixed $object
-	 * @param \TYPO3\Flow\Mvc\Routing\UriBuilder $uriBuilder
+	 * @param \Neos\Flow\Mvc\Routing\UriBuilder $uriBuilder
 	 * @param string $metaDataProcessorGroup
 	 * @return array
 	 */

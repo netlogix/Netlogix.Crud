@@ -12,7 +12,7 @@ namespace Netlogix\Crud\View;
  * The TYPO3 project - inspiring people to share!                         *
  *                                                                        */
 
-use TYPO3\Flow\Annotations as Flow;
+use Neos\Flow\Annotations as Flow;
 
 /**
  * This JsonView expects a very specific "primary object" to be available inside of the
@@ -24,7 +24,7 @@ use TYPO3\Flow\Annotations as Flow;
  * @package Netlogix.Crud
  * @license http://www.gnu.org/licenses/gpl.html GNU General Public License, version 3 or later
  */
-class JsonView extends \TYPO3\Flow\Mvc\View\JsonView {
+class JsonView extends \Neos\Flow\Mvc\View\JsonView {
 
 	/**
 	 * @var \Netlogix\Crud\Domain\Service\SerializationService
@@ -41,7 +41,7 @@ class JsonView extends \TYPO3\Flow\Mvc\View\JsonView {
 	 */
 	protected function renderArray() {
 		$requestControllerActionIdentifier = $this->controllerContext->getRequest()->getControllerObjectName() . '\\' . $this->controllerContext->getRequest()->getControllerActionName() . 'Action';
-		/** @var \TYPO3\Flow\Mvc\Controller\ControllerContext $controllerContext */
+		/** @var \Neos\Flow\Mvc\Controller\ControllerContext $controllerContext */
 		if (count($this->variablesToRender) === 1) {
 			$variableName = current($this->variablesToRender);
 			return isset($this->variables[$variableName]) ? $this->serializationService->process($this->variables[$variableName], $this->controllerContext->getUriBuilder(), $requestControllerActionIdentifier) : NULL;
