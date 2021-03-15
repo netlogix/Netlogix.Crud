@@ -3,9 +3,9 @@
     "type": "typo3-flow-package",
     "description": "netlogix Crud Package",
     "homepage": "http://websolutions.netlogix.de/",
-    "license": ["MIT"],
+    "license": "MIT",
     "require": {
-        "neos/flow": "~4.3.0"
+        "neos/flow": "^4.3 || ^5.3"
     },
     "autoload": {
         "psr-0": {
