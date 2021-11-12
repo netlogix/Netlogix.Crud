@@ -210,7 +210,7 @@ class SerializationService {
 			return $object;
 		} elseif (is_array($object)) {
 			return $this->processCollectionType($object, array_keys($object));
-		} elseif ($object instanceof \DateTime) {
+		} elseif ($object instanceof \DateTimeInterface) {
 			return $object->format(DateTimeConverter::DEFAULT_DATE_FORMAT);
 		} elseif (is_object($object) && ($object instanceof ArrayCollection)) {
 			$arrayRepresentation = $object->toArray();
