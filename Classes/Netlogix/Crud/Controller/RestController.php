@@ -131,7 +131,7 @@ class RestController extends \Neos\Flow\Mvc\Controller\RestController {
 	 *
 	 * @return void
 	 */
-	public function initializeCreateAction() {
+	protected function initializeCreateAction() {
 		$this->initializePropertyMappingConfigurationForCreateActions();
 	}
 
@@ -140,7 +140,7 @@ class RestController extends \Neos\Flow\Mvc\Controller\RestController {
 	 *
 	 * @return void
 	 */
-	public function initializeUpdateAction() {
+	protected function initializeUpdateAction() {
 		$this->initializePropertyMappingConfigurationForUpdateActions();
 	}
 
@@ -149,7 +149,7 @@ class RestController extends \Neos\Flow\Mvc\Controller\RestController {
 	 *
 	 * @return void
 	 */
-	public function initializeDeleteAction() {
+	protected function initializeDeleteAction() {
 		$this->initializePropertyMappingConfigurationForUpdateActions();
 	}
 
@@ -158,7 +158,7 @@ class RestController extends \Neos\Flow\Mvc\Controller\RestController {
 	 *
 	 * @return void
 	 */
-	public function initializeShowAction() {
+	protected function initializeShowAction() {
 		$this->initializePropertyMappingConfigurationForShowActions();
 	}
 
